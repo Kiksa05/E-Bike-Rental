@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 
 
 import java.util.List;
-//komentar22
+//DONE
 @Repository
 public interface CustomerDao extends JpaRepository<Customer, Integer> {
 //    Customer getCustomerById(int id);
