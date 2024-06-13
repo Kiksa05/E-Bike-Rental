@@ -14,6 +14,17 @@ public class Customer {
     private String email;
     private String phone;
     private double accountBalance;
+    private String password;
+
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
 
     // Getters and setters
     public int getId() { return id; }

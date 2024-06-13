@@ -15,5 +15,6 @@ public interface CustomerDao extends JpaRepository<Customer, Integer> {
 //    void saveCustomer(Customer customer);
 //    void updateCustomer(Customer customer);
 //    void deleteCustomer(int id);
+    Customer findByEmail(String email);
 }
 
