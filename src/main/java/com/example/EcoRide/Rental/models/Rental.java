@@ -10,8 +10,12 @@ public class Rental {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    private int customerId;
-    private int ebikeId;
+    @ManyToOne
+    @JoinColumn(name = "customer_id", referencedColumnName = "id")
+    private Customer customer;
+    @ManyToOne
+    @JoinColumn(name = "ebike_id", referencedColumnName = "id")
+    private Ebike ebike;
     private LocalDateTime rentalStartTime;
     private LocalDateTime rentalEndTime;
     private String rentalStatus;
@@ -20,11 +24,21 @@ public class Rental {
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
-    public int getCustomerId() { return customerId; }
-    public void setCustomerId(int customerId) { this.customerId = customerId; }
+    public Customer getCustomer() {
+        return customer;
+    }
 
-    public int getEbikeId() { return ebikeId; }
-    public void setEbikeId(int ebikeId) { this.ebikeId = ebikeId; }
+    public void setCustomer(Customer customer) {
+        this.customer = customer;
+    }
+
+    public Ebike getEbike() {
+        return ebike;
+    }
+
+    public void setEbike(Ebike ebike) {
+        this.ebike = ebike;
+    }
 
     public LocalDateTime getRentalStartTime() { return rentalStartTime; }
     public void setRentalStartTime(LocalDateTime rentalStartTime) { this.rentalStartTime = rentalStartTime; }

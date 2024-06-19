@@ -3,6 +3,8 @@ package com.example.EcoRide.Rental.controllers;
 import com.example.EcoRide.Rental.models.Station;
 import com.example.EcoRide.Rental.dao.StationDao;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,17 +31,24 @@ public class StationController {
         stationDao.save(station);
     }
 
-    @PutMapping
-    public void updateStation(@PathVariable int id,@RequestBody Station stationDetails) {
+    @PutMapping("/{id}")
+    public ResponseEntity<Station> updateStation(@PathVariable int id, @RequestBody Station stationDetails) {
         Station station = stationDao.findById(id).orElse(null);
-        station.setAvailableBikes(stationDetails.getAvailableBikes());
-        station.setLocation(stationDetails.getLocation());
-        stationDao.save(station);
+        if (station != null) {
+            station.setLocation(stationDetails.getLocation());
+            station.setAvailableBikes(stationDetails.getAvailableBikes());
+            return new ResponseEntity<>(stationDao.save(station), HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteStation(@PathVariable int id) {
+    public ResponseEntity<Void> deleteStation(@PathVariable int id) {
         Station station = stationDao.findById(id).orElse(null);
-        stationDao.delete(station);
+        if (station != null) {
+            stationDao.delete(station);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 }

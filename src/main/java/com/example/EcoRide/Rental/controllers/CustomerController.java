@@ -34,20 +34,27 @@ public class CustomerController {
     }
 
     @PutMapping("/{id}")
-    public void updateCustomer(@PathVariable int id, @RequestBody Customer customerDetails) {
+    public ResponseEntity<Customer> updateCustomer(@PathVariable int id, @RequestBody Customer customerDetails) {
         Customer customer = customerDao.findById(id).orElse(null);
-        customer.setName(customerDetails.getName());
-        customer.setEmail(customerDetails.getEmail());
-        customer.setPhone(customerDetails.getPhone());
-        customer.setAccountBalance(customerDetails.getAccountBalance());
-        customer.setPassword(customerDetails.getPassword());
-        customerDao.save(customer);
+        if(customer != null){
+            customer.setName(customerDetails.getName());
+            customer.setEmail(customerDetails.getEmail());
+            customer.setPhone(customerDetails.getPhone());
+            customer.setAccountBalance(customerDetails.getAccountBalance());
+            customer.setPassword(customerDetails.getPassword());
+            return new ResponseEntity<>(customerDao.save(customer), HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteCustomer(@PathVariable int id) {
+    public ResponseEntity<Void> deleteCustomer(@PathVariable int id) {
         Customer customer = customerDao.findById(id).orElse(null);
-        customerDao.deleteById(id);
+        if (customer != null) {
+            customerDao.delete(customer);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     @PostMapping("/register")

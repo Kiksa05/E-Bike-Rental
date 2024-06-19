@@ -3,6 +3,8 @@ package com.example.EcoRide.Rental.controllers;
 import com.example.EcoRide.Rental.models.Payment;
 import com.example.EcoRide.Rental.dao.PaymentDao;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,18 +31,25 @@ public class PaymentController {
         paymentDao.save(payment);
     }
 
-    @PutMapping
-    public void updatePayment(@PathVariable int id,@RequestBody Payment paymentDetails) {
+    @PutMapping("/{id}")
+    public ResponseEntity<Payment> updatePayment(@PathVariable int id, @RequestBody Payment paymentDetails) {
         Payment payment = paymentDao.findById(id).orElse(null);
-        payment.setPaymentStatus(paymentDetails.getPaymentStatus());
-        payment.setAmount(paymentDetails.getAmount());
-        payment.setRentalId(paymentDetails.getRentalId());
-        paymentDao.save(payment);
+        if (payment != null) {
+            payment.setRentalId(paymentDetails.getRentalId());
+            payment.setAmount(paymentDetails.getAmount());
+            payment.setPaymentStatus(paymentDetails.getPaymentStatus());
+            return new ResponseEntity<>(paymentDao.save(payment), HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     @DeleteMapping("/{id}")
-    public void deletePayment(@PathVariable int id) {
+    public ResponseEntity<Void> deletePayment(@PathVariable int id) {
         Payment payment = paymentDao.findById(id).orElse(null);
-        paymentDao.delete(payment);
+        if (payment != null) {
+            paymentDao.delete(payment);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 }

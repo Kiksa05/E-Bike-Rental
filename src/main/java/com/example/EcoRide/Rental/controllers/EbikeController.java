@@ -3,6 +3,8 @@ package com.example.EcoRide.Rental.controllers;
 import com.example.EcoRide.Rental.models.Ebike;
 import com.example.EcoRide.Rental.dao.EbikeDao;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -50,23 +52,25 @@ public class EbikeController {
     }
 
     @PutMapping("/{id}")
-    public Ebike updateEbike(@PathVariable int id, @RequestBody Ebike ebikeDetails) {
+    public ResponseEntity<Ebike> updateEbike(@PathVariable int id, @RequestBody Ebike ebikeDetails) {
         Ebike ebike = ebikeDao.findById(id).orElse(null);
         if (ebike != null) {
             ebike.setModel(ebikeDetails.getModel());
             ebike.setBatteryLevel(ebikeDetails.getBatteryLevel());
             ebike.setStatus(ebikeDetails.getStatus());
             ebike.setStation(ebikeDetails.getStation());
-            return ebikeDao.save(ebike);
+            return new ResponseEntity<>(ebikeDao.save(ebike), HttpStatus.OK);
         }
-        return null;
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteEbike(@PathVariable int id) {
+    public ResponseEntity<Void> deleteEbike(@PathVariable int id) {
         Ebike ebike = ebikeDao.findById(id).orElse(null);
-        ebikeDao.delete(ebike);
-
-//        ebikeDao.deleteById(id);
+        if (ebike != null) {
+            ebikeDao.delete(ebike);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 }

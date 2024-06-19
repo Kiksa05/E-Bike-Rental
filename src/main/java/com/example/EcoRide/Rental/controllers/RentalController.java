@@ -3,9 +3,13 @@ package com.example.EcoRide.Rental.controllers;
 import com.example.EcoRide.Rental.models.Rental;
 import com.example.EcoRide.Rental.dao.RentalDao;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @RestController
 @RequestMapping("/rentals")
@@ -30,18 +34,37 @@ public class RentalController {
     }
 
     @PutMapping
-    public void updateRental(@PathVariable int id,@RequestBody Rental rentalDetails) {
+    public ResponseEntity<Rental> updateRental(@PathVariable int id,@RequestBody Rental rentalDetails) {
         Rental rental = rentalDao.findById(id).orElse(null);
-        rental.setCustomerId(rentalDetails.getCustomerId());
-        rental.setEbikeId(rentalDetails.getEbikeId());
+        if (rental != null) {
+        rental.setCustomer(rentalDetails.getCustomer());
+        rental.setEbike(rentalDetails.getEbike());
         rental.setRentalStartTime(rentalDetails.getRentalStartTime());
         rental.setRentalEndTime(rentalDetails.getRentalEndTime());
-        rentalDao.save(rental);
+        rental.setRentalStatus(rentalDetails.getRentalStatus());
+        return new ResponseEntity<>(rentalDao.save(rental), HttpStatus.OK);
     }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+}
 
     @DeleteMapping("/{id}")
-    public void deleteRental(@PathVariable int id) {
+    public ResponseEntity<Void> deleteRental(@PathVariable int id) {
         Rental rental = rentalDao.findById(id).orElse(null);
-        rentalDao.delete(rental);
+        if (rental != null) {
+            rentalDao.delete(rental);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+
+    //http://localhost:8080/rentals/search?customerId=3&ebikeModel=ModelX&startDate=2024-01-01T10:00:00&endDate=2024-01-01T12:00:00
+    @GetMapping("/search")
+    public List<Rental> findRentalsByCustomerEbikeAndDateRange(
+            @RequestParam int customerId,
+            @RequestParam String ebikeModel,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDateTime startDate,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDateTime endDate) {
+        return rentalDao.findRentalsByCustomerEbikeAndDate(customerId, ebikeModel, startDate, endDate);
     }
 }
