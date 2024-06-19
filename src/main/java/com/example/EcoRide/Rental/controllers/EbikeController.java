@@ -44,9 +44,6 @@ public class EbikeController {
 
 
 
-
-
-
     @PostMapping
     public void saveEbike(@RequestBody Ebike ebike) {
         ebikeDao.save(ebike);
@@ -67,6 +64,9 @@ public class EbikeController {
 
     @DeleteMapping("/{id}")
     public void deleteEbike(@PathVariable int id) {
-        ebikeDao.deleteById(id);
+        Ebike ebike = ebikeDao.findById(id).orElse(null);
+        ebikeDao.delete(ebike);
+
+//        ebikeDao.deleteById(id);
     }
 }

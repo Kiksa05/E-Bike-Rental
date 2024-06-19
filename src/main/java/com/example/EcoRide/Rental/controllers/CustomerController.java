@@ -33,13 +33,20 @@ public class CustomerController {
         customerDao.save(customer);
     }
 
-    @PutMapping
-    public void updateCustomer(@RequestBody Customer customer) {
+    @PutMapping("/{id}")
+    public void updateCustomer(@PathVariable int id, @RequestBody Customer customerDetails) {
+        Customer customer = customerDao.findById(id).orElse(null);
+        customer.setName(customerDetails.getName());
+        customer.setEmail(customerDetails.getEmail());
+        customer.setPhone(customerDetails.getPhone());
+        customer.setAccountBalance(customerDetails.getAccountBalance());
+        customer.setPassword(customerDetails.getPassword());
         customerDao.save(customer);
     }
 
     @DeleteMapping("/{id}")
     public void deleteCustomer(@PathVariable int id) {
+        Customer customer = customerDao.findById(id).orElse(null);
         customerDao.deleteById(id);
     }
 

@@ -30,12 +30,17 @@ public class PaymentController {
     }
 
     @PutMapping
-    public void updatePayment(@RequestBody Payment payment) {
+    public void updatePayment(@PathVariable int id,@RequestBody Payment paymentDetails) {
+        Payment payment = paymentDao.findById(id).orElse(null);
+        payment.setPaymentStatus(paymentDetails.getPaymentStatus());
+        payment.setAmount(paymentDetails.getAmount());
+        payment.setRentalId(paymentDetails.getRentalId());
         paymentDao.save(payment);
     }
 
     @DeleteMapping("/{id}")
     public void deletePayment(@PathVariable int id) {
-        paymentDao.deleteById(id);
+        Payment payment = paymentDao.findById(id).orElse(null);
+        paymentDao.delete(payment);
     }
 }

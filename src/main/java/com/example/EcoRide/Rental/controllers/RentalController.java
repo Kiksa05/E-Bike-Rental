@@ -30,12 +30,18 @@ public class RentalController {
     }
 
     @PutMapping
-    public void updateRental(@RequestBody Rental rental) {
+    public void updateRental(@PathVariable int id,@RequestBody Rental rentalDetails) {
+        Rental rental = rentalDao.findById(id).orElse(null);
+        rental.setCustomerId(rentalDetails.getCustomerId());
+        rental.setEbikeId(rentalDetails.getEbikeId());
+        rental.setRentalStartTime(rentalDetails.getRentalStartTime());
+        rental.setRentalEndTime(rentalDetails.getRentalEndTime());
         rentalDao.save(rental);
     }
 
     @DeleteMapping("/{id}")
     public void deleteRental(@PathVariable int id) {
-        rentalDao.deleteById(id);
+        Rental rental = rentalDao.findById(id).orElse(null);
+        rentalDao.delete(rental);
     }
 }

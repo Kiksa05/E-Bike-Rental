@@ -30,12 +30,16 @@ public class StationController {
     }
 
     @PutMapping
-    public void updateStation(@RequestBody Station station) {
+    public void updateStation(@PathVariable int id,@RequestBody Station stationDetails) {
+        Station station = stationDao.findById(id).orElse(null);
+        station.setAvailableBikes(stationDetails.getAvailableBikes());
+        station.setLocation(stationDetails.getLocation());
         stationDao.save(station);
     }
 
     @DeleteMapping("/{id}")
     public void deleteStation(@PathVariable int id) {
-        stationDao.deleteById(id);
+        Station station = stationDao.findById(id).orElse(null);
+        stationDao.delete(station);
     }
 }
