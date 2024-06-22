@@ -16,6 +16,7 @@ import java.io.IOException;
 @Service
 public class PDFGenerator {
 
+    //update
     private static final Logger logger = LoggerFactory.getLogger(PDFGenerator.class);
 
     public ByteArrayInputStream generateTermsAndConditionsPdf() throws IOException {
