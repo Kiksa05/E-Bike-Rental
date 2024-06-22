@@ -2,12 +2,15 @@ package com.example.EcoRide.Rental.controllers;
 
 import com.example.EcoRide.Rental.models.Customer;
 import com.example.EcoRide.Rental.dao.CustomerDao;
+import com.example.EcoRide.Rental.service.Email;
+import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -16,6 +19,9 @@ public class CustomerController {
 
     @Autowired
     private CustomerDao customerDao;
+
+    @Autowired
+    private Email emailService;
 
 
     @GetMapping("/{id}")
@@ -66,6 +72,15 @@ public class CustomerController {
 
         // Save the customer with plain text password (not recommended for production)
         customerDao.save(customer);
+
+        // Send registration email with PDF attachment
+        try {
+            emailService.sendRegistrationEmail(customer.getEmail(), customer.getName());
+        } catch (MessagingException | IOException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Failed to send email");
+        }
+
         return new ResponseEntity<>("Registration successful", HttpStatus.OK);
     }
 
