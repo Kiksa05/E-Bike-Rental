@@ -1,5 +1,5 @@
 import axios from "axios";
-
+//komunikacija z backend
 const api = axios.create({
     baseURL: process.env.REACT_APP_BASE_URL,
     timeout: 30000,
@@ -9,8 +9,5 @@ const api = axios.create({
     },
 });
 
-// export const registerCustomer = async (customer) => {
-//     return api.post('/customers/register', customer);
-// };
 
 export default api;
