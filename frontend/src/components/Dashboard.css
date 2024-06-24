@@ -1,0 +1,41 @@
+.dashboard {
+    text-align: center;
+    padding: 20px 0;
+}
+
+.ebike-list {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.ebike-item {
+    width: 300px;
+    margin: 40px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+    transition: transform 0.2s;
+}
+
+.ebike-item:hover {
+    transform: scale(1.05);
+}
+
+.ebike-item img {
+    width: 100%;
+    height: auto;
+    border-bottom: 1px solid #ddd;
+}
+
+.ebike-item h3 {
+    margin: 15px 0 10px;
+    font-size: 20px;
+}
+
+.ebike-item p {
+    padding: 0 15px 15px;
+    font-size: 14px;
+    color: #555;
+}
