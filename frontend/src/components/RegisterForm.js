@@ -12,20 +12,11 @@ const RegistrationForm = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         try {
-            const response = await api.post("/customers/register", {
-                name,
-                email,
-                password,
-                phone,
-            });
-            console.log('Registration successful:', response.data);
-            alert('Registration successful!');
-            navigate("/login");
+            await api.post('/customers/register', { name, email, password, phone });
+            navigate('/login');
         } catch (error) {
             console.error('Registration error:', error);
-            alert('Registration failed. Please try again.');
         }
     };
 

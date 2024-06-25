@@ -11,14 +11,13 @@ const LoginForm = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         try {
-            const response = await api.post("/customers/login", {
-                email,
-                password,
-            });
-            console.log('Login successful:', response.data);
-            navigate("/dashboard"); // Redirect to the dashboard or any other page upon successful login
+            const response = await api.post('/customers/login', { email, password });
+            const { userId, userRole } = response.data;
+            sessionStorage.setItem('userId', userId);
+            sessionStorage.setItem('userRole', userRole);
+            navigate('/');
+            window.location.reload();
         } catch (error) {
             console.error('Login error:', error);
         }
