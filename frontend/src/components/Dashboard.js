@@ -1,62 +1,29 @@
 import React from 'react';
 import './Dashboard.css';
 import Footer from './Footer';
-
-import img1 from '../assets/1.jpg';
-import img2 from '../assets/2.jpg';
-import img3 from '../assets/3.jpg';
-import { useNavigate } from 'react-router-dom';
-
-const ebikes = [
-    {
-        id: 1,
-        name: 'EcoBike Pro',
-        description: 'The EcoBike Pro is perfect for long rides with a battery life of up to 70 miles.',
-        imageUrl: img1,
-    },
-    {
-        id: 2,
-        name: 'City Cruiser',
-        description: 'Ideal for city commuting, the City Cruiser combines style and efficiency.',
-        imageUrl: img2,
-    },
-    {
-        id: 3,
-        name: 'Mountain Master',
-        description: 'Conquer any terrain with the Mountain Master, built for off-road adventures.',
-        imageUrl: img3,
-    },
-];
-
+import Reviews from './Reviews';
+import BikeOffer from './BikeOffer';
 
 const Dashboard = () => {
-    const navigate = useNavigate();
-
-    const customerId = 1; // Replace with actual logged-in customer ID
-
-    const handleRent = (bike) => {
-        navigate('/reservations', {
-            state: {
-                ebikeId: bike.id,
-                ebikeName: bike.name,
-                customerId,
-            },
-        });
-    };
 
     return (
         <div className="dashboard">
-            <div className="ebike-list">
-                {ebikes.map((ebike) => (
-                    <div key={ebike.id} className="ebike-item">
-                        <img src={ebike.imageUrl} alt={ebike.name} />
-                        <h3>{ebike.name}</h3>
-                        <p>{ebike.description}</p>
-                        <button onClick={() => handleRent(ebike)}>Rent Now</button>
-                    </div>
-                ))}
-            </div>
 
+            <BikeOffer />
+
+            <h3>Where can you find us?</h3>
+            <div className="maps" style={{ width: '80%', maxWidth: '800px', margin: '20px auto', borderRadius: '25px', overflow: 'hidden' }}>
+                <iframe
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2745.0068511732375!2d15.666212976809604!3d46.52776626185047!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x476f79fda6c9cc37%3A0x8b3f6d26b442e8f7!2sPtujska%20cesta%2C%20Maribor!5e0!3m2!1sen!2ssi!4v1683713064679!5m2!1sen!2ssi"
+                    title="Google Maps"
+                    width="100%"
+                    height="500"
+                    style={{ borderRadius: '25px', border: 'none' }}
+                    allowFullScreen=""
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                ></iframe></div>
+            <Reviews />
             <Footer />
         </div>
     );

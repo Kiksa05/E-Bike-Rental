@@ -4,40 +4,46 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import './RegisterForm.css';
 
 const ReservationForm = () => {
-    const [customerId, setCustomerId] = useState('');
-    const [ebikeId, setEbikeId] = useState('');
-    const [ebikeName, setEbikeName] = useState('');
+    const location = useLocation();
+    const navigate = useNavigate();
+    const { ebikeId, ebikeName, customerId, pricePerDay } = location.state || {};
+
+    const [passportNumber, setPassportNumber] = useState('');
     const [startTime, setStartTime] = useState('');
     const [endTime, setEndTime] = useState('');
-    const navigate = useNavigate();
-    const location = useLocation();
+    const [totalPrice, setTotalPrice] = useState(0);
+
 
     useEffect(() => {
-        if (location.state) {
-            const { ebikeId, ebikeName, customerId } = location.state;
-            setEbikeId(ebikeId);
-            setEbikeName(ebikeName);
-            setCustomerId(customerId);
+        const now = new Date();
+        const defaultEndTime = new Date(now.getTime() + 60 * 60 * 1000);
+        setStartTime(now.toISOString().substring(0, 16));
+        setEndTime(defaultEndTime.toISOString().substring(0, 16));
+    }, []);
 
-            const now = new Date();
-            const oneHourLater = new Date(now.getTime() + 60 * 60 * 1000);
-
-            setStartTime(now.toISOString().slice(0, 16));
-            setEndTime(oneHourLater.toISOString().slice(0, 16));
+    useEffect(() => {
+        if (startTime && endTime) {
+            const start = new Date(startTime);
+            const end = new Date(endTime);
+            const diffTime = Math.abs(end - start);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            setTotalPrice(diffDays * pricePerDay);
         }
-    }, [location.state]);
+    }, [startTime, endTime, pricePerDay]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await api.post('/reservations', {
-                customer: { id: customerId },
-                ebike: { id: ebikeId },
-                startTime,
-                endTime,
+            await api.post('/rentals/pending', {
+                customer: { id: parseInt(customerId) }, // Ensure this is a number
+                ebike: { id: parseInt(ebikeId) }, // Ensure this is a number
+                rentalStartTime: startTime,
+                rentalEndTime: endTime,
+                passportNumber: passportNumber,
+                rentalStatus: 'Pending',
             });
-            console.log('Reservation successful:', response.data);
-            navigate('/');
+            alert('Reservation created successfully, please wait on admin to approve it!');
+            navigate('/'); // Redirect to home or another page after successful reservation
         } catch (error) {
             console.error('Error creating reservation:', error);
         }
@@ -45,30 +51,23 @@ const ReservationForm = () => {
 
     return (
         <div className="reservation-form">
-            <h2>Make a Reservation</h2>
+            <h2>Reserve {ebikeName}</h2>
             <form onSubmit={handleSubmit}>
                 <div>
-                    <label>Customer ID:</label>
-                    <input
-                        type="text"
-                        value={customerId}
-                        readOnly
-                    />
+                    <label>Customer Id:</label>
+                    <input type="text" value={customerId} readOnly />
                 </div>
                 <div>
-                    <label>Ebike ID:</label>
-                    <input
-                        type="text"
-                        value={ebikeId}
-                        readOnly
-                    />
+                    <label>Ebike Id:</label>
+                    <input type="text" value={ebikeId} readOnly />
                 </div>
                 <div>
-                    <label>Ebike Name:</label>
+                    <label>Passport Number:</label>
                     <input
                         type="text"
-                        value={ebikeName}
-                        readOnly
+                        value={passportNumber}
+                        onChange={(e) => setPassportNumber(e.target.value)}
+                        required
                     />
                 </div>
                 <div>
@@ -77,6 +76,7 @@ const ReservationForm = () => {
                         type="datetime-local"
                         value={startTime}
                         onChange={(e) => setStartTime(e.target.value)}
+                        required
                     />
                 </div>
                 <div>
@@ -85,9 +85,14 @@ const ReservationForm = () => {
                         type="datetime-local"
                         value={endTime}
                         onChange={(e) => setEndTime(e.target.value)}
+                        required
                     />
                 </div>
-                <button type="submit">Make Reservation</button>
+                <div>
+                    <label>Total Price:</label>
+                    <input type="text" value={`$${totalPrice.toFixed(2)}`} readOnly />
+                </div>
+                <button type="submit">Reserve</button>
             </form>
         </div>
     );
