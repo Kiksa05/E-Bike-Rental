@@ -3,7 +3,7 @@ import api from '../services/api';
 import "../components/RegisterForm.css";
 import { useNavigate } from 'react-router-dom';
 
-const AdminDashboard = () => {
+const AdminDashboard = ({ refreshBikeList }) => {
     const [pendingRentals, setPendingRentals] = useState([]);
     const navigate = useNavigate();
 
@@ -24,6 +24,7 @@ const AdminDashboard = () => {
         try {
             await api.put(`/rentals/approve/${rentalId}`);
             setPendingRentals(pendingRentals.filter(rental => rental.id !== rentalId));
+            refreshBikeList();
             navigate('/');
         } catch (error) {
             console.error('Error approving rental:', error);
@@ -34,11 +35,13 @@ const AdminDashboard = () => {
         try {
             await api.put(`/rentals/reject/${rentalId}`);
             setPendingRentals(pendingRentals.filter(rental => rental.id !== rentalId));
+            refreshBikeList();
             navigate('/');
         } catch (error) {
             console.error('Error rejecting rental:', error);
         }
     };
+
 
     return (
         <div className="admin-dashboard">

@@ -10,17 +10,17 @@ const BikeOffer = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const navigate = useNavigate();
 
-    useEffect(() => {
-        const fetchBikes = async () => {
-            try {
-                const response = await api.get('/ebikes');
-                console.log('API Response:', response.data);
-                setEbikes(response.data);
-            } catch (error) {
-                console.error('Error fetching bikes:', error);
-            }
-        };
+    const fetchBikes = async () => {
+        try {
+            const response = await api.get('/ebikes');
+            console.log('API Response:', response.data);
+            setEbikes(response.data);
+        } catch (error) {
+            console.error('Error fetching bikes:', error);
+        }
+    };
 
+    useEffect(() => {
         const loggedIn = sessionStorage.getItem('userId') && sessionStorage.getItem('userRole');
         setIsLoggedIn(loggedIn);
 
@@ -51,14 +51,13 @@ const BikeOffer = () => {
                     <p>Battery Level: {ebike.batteryLevel}%</p>
                     <p>Price: {ebike.price}$ per day</p>
                     <p style={{ color: ebike.status === "Available" ? "green" : "red" }}>{ebike.status}</p>
-                    {ebike.status === "Available" && (
-                        <button onClick={() => handleRent(ebike)}>Rent Now</button>
-                    )}
+                    <button onClick={() => handleRent(ebike)} disabled={ebike.status !== "Available"}>Rent Now</button>
                 </div>
             ))}
         </div>
     );
 }
+
 const getImage = (id) => {
     switch (id) {
         case 4:
