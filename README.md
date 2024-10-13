@@ -5,18 +5,18 @@
 The application allows users to register, browse available e-bikes, and reserve a bike for a specific time. After placing a reservation, the request must be approved by an administrator before the bike can be confirmed for use.
 
 ## Key Features:
-User Registration: New users can create an account to start making reservations.
-Bike Reservation: Select an available e-bike and submit a reservation request.
-Admin Confirmation: All reservations require administrator approval before the bike is confirmed for the user.
-Real-time Status Updates: Users can view the status of their reservation (pending, approved, or declined).
-Technologies Used
-Backend: Spring Boot
-Frontend: React
-Database: H2 (for development, switchable to other DBs in production)
-API Documentation: Swagger UI (for testing API endpoints)
+- User Registration: New users can create an account to start making reservations.
+- Bike Reservation: Select an available e-bike and submit a reservation request.
+- Admin Confirmation: All reservations require administrator approval before the bike is confirmed for the user.
+- Real-time Status Updates: Users can view the status of their reservation (pending, approved, or declined).
+  
+## Technologies Used
+- Backend: Spring Boot
+- Frontend: React
+- Database: MySQL 
 
 ## Installation Guide
-#Prerequisites
+Prerequisites
 Ensure you have the following installed on your machine:
 
 - Java (JDK 17 or higher)
