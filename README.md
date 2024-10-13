@@ -19,13 +19,13 @@ API Documentation: Swagger UI (for testing API endpoints)
 #Prerequisites
 Ensure you have the following installed on your machine:
 
-Java (JDK 17 or higher)
-Node.js and npm
-Maven (for Spring Boot)
-A web browser
+- Java (JDK 17 or higher)
+- Node.js and npm
+- Maven (for Spring Boot)
+- A web browser
 
 ## Usage
-Register or log in as a user.
-Browse available e-bikes.
-Submit a reservation request for a bike.
-Wait for an admin to confirm your reservation.
+- Register or log in as a user.
+- Browse available e-bikes.
+- Submit a reservation request for a bike.
+- Wait for an admin to confirm your reservation.
