@@ -19,6 +19,7 @@ public class Rental {
     private LocalDateTime rentalStartTime;
     private LocalDateTime rentalEndTime;
     private String rentalStatus;
+    private String passportNumber;
 
     // Getters and setters
     public int getId() { return id; }
@@ -48,4 +49,12 @@ public class Rental {
 
     public String getRentalStatus() { return rentalStatus; }
     public void setRentalStatus(String rentalStatus) { this.rentalStatus = rentalStatus; }
+
+    public String getPassportNumber() {
+        return passportNumber;
+    }
+
+    public void setPassportNumber(String passportNumber) {
+        this.passportNumber = passportNumber;
+    }
 }

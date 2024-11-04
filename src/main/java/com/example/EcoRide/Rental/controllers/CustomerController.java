@@ -15,6 +15,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/customers")
+@CrossOrigin
 public class CustomerController {
 
     @Autowired
@@ -65,11 +66,15 @@ public class CustomerController {
 
     @PostMapping("/register")
     public ResponseEntity<String> registerCustomer(@RequestBody Customer customer) {
+        String email = customer.getEmail();
+        String role = email.equalsIgnoreCase("admin@admin.com") ? "admin" : "user";
+//        customer.setRole(role);
         // Check if email already exists
         if (customerDao.findByEmail(customer.getEmail()) != null) {
             return new ResponseEntity<>("Email already in use", HttpStatus.BAD_REQUEST);
         }
 
+        customer.setRole(role);
         // Save the customer with plain text password (not recommended for production)
         customerDao.save(customer);
 
@@ -91,7 +96,11 @@ public class CustomerController {
         if (existingCustomer == null || !customer.getPassword().equals(existingCustomer.getPassword())) {
             return new ResponseEntity<>("Invalid email or password", HttpStatus.UNAUTHORIZED);
         }
-        return new ResponseEntity<>("Login successful", HttpStatus.OK);
+        String userId = String.valueOf(existingCustomer.getId());
+        String userRole = existingCustomer.getRole();
+        String jsonResponse = "{\"userId\": \"" + userId + "\", \"userRole\": \"" + userRole + "\"}";
+
+        return ResponseEntity.ok(jsonResponse);
     }
 
 }

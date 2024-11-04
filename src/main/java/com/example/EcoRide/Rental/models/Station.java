@@ -1,5 +1,6 @@
 package com.example.EcoRide.Rental.models;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import java.util.List;
@@ -10,7 +11,8 @@ public class Station {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private String location;
-    @OneToMany(mappedBy = "station")
+    @OneToMany(mappedBy = "station", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<Ebike> availableBikes;
 
     // Getters and setters

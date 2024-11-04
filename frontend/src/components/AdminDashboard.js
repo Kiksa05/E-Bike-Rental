@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import "../components/RegisterForm.css";
-import { useNavigate } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom';
 
 const AdminDashboard = ({ refreshBikeList }) => {
     const [pendingRentals, setPendingRentals] = useState([]);
-    const navigate = useNavigate();
+    // const navigate = useNavigate();
 
     useEffect(() => {
         const fetchPendingRentals = async () => {
@@ -25,7 +25,7 @@ const AdminDashboard = ({ refreshBikeList }) => {
             await api.put(`/rentals/approve/${rentalId}`);
             setPendingRentals(pendingRentals.filter(rental => rental.id !== rentalId));
             refreshBikeList();
-            navigate('/');
+            // navigate('/');
         } catch (error) {
             console.error('Error approving rental:', error);
         }
@@ -36,7 +36,7 @@ const AdminDashboard = ({ refreshBikeList }) => {
             await api.put(`/rentals/reject/${rentalId}`);
             setPendingRentals(pendingRentals.filter(rental => rental.id !== rentalId));
             refreshBikeList();
-            navigate('/');
+            // navigate('/');
         } catch (error) {
             console.error('Error rejecting rental:', error);
         }

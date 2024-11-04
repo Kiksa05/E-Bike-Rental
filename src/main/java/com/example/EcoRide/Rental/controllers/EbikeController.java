@@ -59,6 +59,7 @@ public class EbikeController {
             ebike.setBatteryLevel(ebikeDetails.getBatteryLevel());
             ebike.setStatus(ebikeDetails.getStatus());
             ebike.setStation(ebikeDetails.getStation());
+            ebike.setPrice(ebikeDetails.getPrice());
             return new ResponseEntity<>(ebikeDao.save(ebike), HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
