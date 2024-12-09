@@ -60,11 +60,11 @@ const BikeOffer = () => {
 
 const getImage = (id) => {
     switch (id) {
-        case 4:
+        case 1:
             return img1;
-        case 5:
+        case 2:
             return img2;
-        case 6:
+        case 3:
             return img3;
         default:
             return '';
