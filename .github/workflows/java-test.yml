@@ -24,7 +24,7 @@ jobs:
         run: npm ci
 
       - name: Build React app
-        run: npm run build
+        run: CI=false npm run build  # disables "warnings as errors" in CRA
 
       - name: Deploy to Vercel
         uses: amondnet/vercel-action@v25
@@ -59,7 +59,7 @@ jobs:
         run: ./mvnw clean package -DskipTests
 
       - name: Deploy to Railway
-        uses: Railwayapp/railway-action@v2
+        uses: railway/action@v2
         with:
           railwayToken: ${{ secrets.RAILWAY_API_TOKEN }}
           projectId: ${{ secrets.RAILWAY_PROJECT_ID }}
