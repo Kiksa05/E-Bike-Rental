@@ -11,7 +11,9 @@ import org.springframework.http.ResponseEntity;
 
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/customers")
@@ -67,7 +69,7 @@ public class CustomerController {
     @PostMapping("/register")
     public ResponseEntity<String> registerCustomer(@RequestBody Customer customer) {
         String email = customer.getEmail();
-        String role = email.equalsIgnoreCase("admin@admin.com") ? "admin" : "user";
+        String role = email.equalsIgnoreCase("kiksa@admin.com") ? "admin" : "user";
 //        customer.setRole(role);
         // Check if email already exists
         if (customerDao.findByEmail(customer.getEmail()) != null) {
@@ -79,28 +81,30 @@ public class CustomerController {
         customerDao.save(customer);
 
         // Send registration email with PDF attachment
-        try {
-            emailService.sendRegistrationEmail(customer.getEmail(), customer.getName());
-        } catch (MessagingException | IOException e) {
-            e.printStackTrace();
-            return ResponseEntity.status(500).body("Failed to send email");
-        }
+//        try {
+//            emailService.sendRegistrationEmail(customer.getEmail(), customer.getName());
+//        } catch (MessagingException | IOException e) {
+//            e.printStackTrace();
+//            return ResponseEntity.status(500).body("Failed to send email");
+//        }
 
         return new ResponseEntity<>("Registration successful", HttpStatus.OK);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> loginCustomer(@RequestBody Customer customer) {
+    public ResponseEntity<?> loginCustomer(@RequestBody Customer customer) {
         // Find customer by email
         Customer existingCustomer = customerDao.findByEmail(customer.getEmail());
         if (existingCustomer == null || !customer.getPassword().equals(existingCustomer.getPassword())) {
             return new ResponseEntity<>("Invalid email or password", HttpStatus.UNAUTHORIZED);
         }
-        String userId = String.valueOf(existingCustomer.getId());
-        String userRole = existingCustomer.getRole();
-        String jsonResponse = "{\"userId\": \"" + userId + "\", \"userRole\": \"" + userRole + "\"}";
 
-        return ResponseEntity.ok(jsonResponse);
+        Map<String, String> response = new HashMap<>();
+        response.put("userId", String.valueOf(existingCustomer.getId()));
+        response.put("userRole", existingCustomer.getRole());
+        response.put("userName", existingCustomer.getName());
+
+        return ResponseEntity.ok(response);
     }
 
 }
