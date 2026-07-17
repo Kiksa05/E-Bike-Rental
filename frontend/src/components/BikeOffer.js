@@ -51,7 +51,7 @@ const BikeOffer = () => {
                     <p>Battery Level: {ebike.batteryLevel}%</p>
                     <p>Price: {ebike.price}$ per day</p>
                     <p style={{ color: ebike.status === "Available" ? "green" : "red" }}>{ebike.status}</p>
-                    <button onClick={() => handleRent(ebike)} disabled={ebike.status !== "Available"}>Rent Now</button>
+                    <button className="auth-button" onClick={() => handleRent(ebike)} disabled={ebike.status !== "Available"}>Rent Now</button>
                 </div>
             ))}
         </div>

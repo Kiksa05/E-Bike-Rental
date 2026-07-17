@@ -50,46 +50,65 @@ const ReservationForm = () => {
     };
 
     return (
-        <div className="reservation-form">
+        <div className="auth-container">
+            <div className="auth-card">
             <h2>Reserve {ebikeName}</h2>
             <form onSubmit={handleSubmit}>
-                <div>
+                <div className="form-group">
                     <label>Customer Name: </label>
                     <input type="text" value={customerName} readOnly />
                 </div>
-                <div>
-                    <label>Passport Number:</label>
-                    <input
-                        type="text"
-                        value={passportNumber}
-                        onChange={(e) => setPassportNumber(e.target.value)}
-                        required
-                    />
-                </div>
-                <div>
-                    <label>Start Time: </label>
-                    <input
-                        type="datetime-local"
-                        value={startTime}
-                        onChange={(e) => setStartTime(e.target.value)}
-                        required
-                    />
-                </div>
-                <div>
-                    <label>End Time: </label>
-                    <input
-                        type="datetime-local"
-                        value={endTime}
-                        onChange={(e) => setEndTime(e.target.value)}
-                        required
-                    />
-                </div>
-                <div>
-                    <label>Total Price: </label>
-                    <input type="text" value={`$${totalPrice.toFixed(2)}`} readOnly />
-                </div>
-                <button type="submit">Reserve</button>
-            </form>
+                <div className="form-group">
+                        <label>Passport Number:</label>
+                        <input
+                            type="text"
+                            value={passportNumber}
+                            onChange={(e) => setPassportNumber(e.target.value)}
+                            required
+                        />
+                    </div>
+
+
+                    <div className="form-group">
+                        <label>Start Time:</label>
+                        <input
+                            type="datetime-local"
+                            value={startTime}
+                            onChange={(e) => setStartTime(e.target.value)}
+                            required
+                        />
+                    </div>
+
+
+                    <div className="form-group">
+                        <label>End Time:</label>
+                        <input
+                            type="datetime-local"
+                            value={endTime}
+                            onChange={(e) => setEndTime(e.target.value)}
+                            required
+                        />
+                    </div>
+
+
+                    <div className="form-group">
+                        <label>Total Price:</label>
+                        <input
+                            type="text"
+                            value={`$${totalPrice.toFixed(2)}`}
+                            readOnly
+                        />
+                    </div>
+
+
+                    <button className="auth-button" type="submit">
+                        Reserve
+                    </button>
+
+                </form>
+
+            </div>
+
         </div>
     );
 };

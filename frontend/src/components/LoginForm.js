@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import api from "../services/api";
 import { useNavigate } from "react-router-dom";
-import './RegisterForm';
+import './RegisterForm.css';
 import Swal from 'sweetalert2';
 // import Footer from '../Footer/Footer';
 
@@ -45,19 +45,37 @@ const LoginForm = () => {
     };
 
     return (
-        <div>
-            <h2>Login</h2>
-            <form onSubmit={handleSubmit}>
-                <div>
-                    <label>Email:</label>
-                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+        <div className="auth-container">
+            <div className="auth-card">
+                <h2>Login</h2>
+                <form className="auth-form" onSubmit={handleSubmit}>
+                    <div className="form-group">
+                                        <label>Email</label>
+                                        <input
+                                            type="email"
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
+                                            required
+                                        />
+                                    </div>
+
+                    <div className="form-group">
+                                        <label>Password</label>
+                                        <input
+                                            type="password"
+                                            value={password}
+                                            onChange={(e) => setPassword(e.target.value)}
+                                            required
+                                        />
+                                    </div>
+
+                    <button className="auth-button" type="submit">Sign In</button>
+                </form>
+
+                <div className="auth-link">
+                                Don't have an account? <a href="/register">Register</a>
                 </div>
-                <div>
-                    <label>Password:</label>
-                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-                </div>
-                <button type="submit">Login</button>
-            </form>
+            </div>
             {/* <Footer /> */}
         </div>
     );

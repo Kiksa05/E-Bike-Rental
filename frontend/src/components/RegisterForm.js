@@ -38,28 +38,69 @@ const RegistrationForm = () => {
     };
 
     return (
-        <div>
-            <h2>Register</h2>
-            <form onSubmit={handleSubmit}>
-                <div>
-                    <label>Name:</label>
-                    <input type="text" value={name} onChange={(e) => setName(e.target.value)} required />
+        <div className="auth-container">
+            <div className="auth-card">
+
+                <h2>Create Account</h2>
+
+                <form className="auth-form" onSubmit={handleSubmit}>
+
+                    <div className="form-group">
+                        <label>Name</label>
+                        <input
+                            type="text"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            required
+                        />
+                    </div>
+
+
+                    <div className="form-group">
+                        <label>Email</label>
+                        <input
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                        />
+                    </div>
+
+
+                    <div className="form-group">
+                        <label>Password</label>
+                        <input
+                            type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                        />
+                    </div>
+
+
+                    <div className="form-group">
+                        <label>Phone</label>
+                        <input
+                            type="text"
+                            value={phone}
+                            onChange={(e) => setPhone(e.target.value)}
+                            required
+                        />
+                    </div>
+
+
+                    <button className="auth-button" type="submit">
+                        Register
+                    </button>
+
+                </form>
+
+
+                <div className="auth-link">
+                    Already have an account? <a href="/login">Login</a>
                 </div>
-                <div>
-                    <label>Email:</label>
-                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-                </div>
-                <div>
-                    <label>Password:</label>
-                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-                </div>
-                <div>
-                    <label>Phone:</label>
-                    <input type="text" value={phone} onChange={(e) => setPhone(e.target.value)} required />
-                </div>
-                <button type="submit">Register</button>
-            </form>
-            {/* <Footer /> */}
+
+            </div>
         </div>
     );
 };
