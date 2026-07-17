@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import api from "../services/api";
 import { useNavigate } from "react-router-dom";
 import './RegisterForm.css';
+import Swal from 'sweetalert2';
 
 const RegistrationForm = () => {
     const [name, setName] = useState('');
@@ -14,10 +15,26 @@ const RegistrationForm = () => {
         e.preventDefault();
         try {
             await api.post('/customers/register', { name, email, password, phone });
-            navigate('/login');
+            Swal.fire({
+                title: 'Success!',
+                text: 'Account created successfully',
+                icon: 'success',
+                confirmButtonColor: '#007bff',
+            }).then(() => {
+                navigate('/login');
+            });
+
         } catch (error) {
             console.error('Registration error:', error);
-        }
+
+            Swal.fire({
+                            title: 'Registration Failed',
+                            text: error.response?.data || 'Something went wrong. Please try again.',
+                            icon: 'error',
+                            confirmButtonColor: '#d33'
+                        });
+            }
+
     };
 
     return (

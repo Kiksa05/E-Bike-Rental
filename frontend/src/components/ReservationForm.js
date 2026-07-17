@@ -6,7 +6,7 @@ import './RegisterForm.css';
 const ReservationForm = () => {
     const location = useLocation();
     const navigate = useNavigate();
-    const { ebikeId, ebikeName, customerId, pricePerDay } = location.state || {};
+    const { ebikeId, ebikeName, customerId, customerName, pricePerDay } = location.state || {};
 
     const [passportNumber, setPassportNumber] = useState('');
     const [startTime, setStartTime] = useState('');
@@ -54,12 +54,8 @@ const ReservationForm = () => {
             <h2>Reserve {ebikeName}</h2>
             <form onSubmit={handleSubmit}>
                 <div>
-                    <label>Customer Id:</label>
-                    <input type="text" value={customerId} readOnly />
-                </div>
-                <div>
-                    <label>Ebike Id:</label>
-                    <input type="text" value={ebikeId} readOnly />
+                    <label>Customer Name: </label>
+                    <input type="text" value={customerName} readOnly />
                 </div>
                 <div>
                     <label>Passport Number:</label>
@@ -71,7 +67,7 @@ const ReservationForm = () => {
                     />
                 </div>
                 <div>
-                    <label>Start Time:</label>
+                    <label>Start Time: </label>
                     <input
                         type="datetime-local"
                         value={startTime}
@@ -80,7 +76,7 @@ const ReservationForm = () => {
                     />
                 </div>
                 <div>
-                    <label>End Time:</label>
+                    <label>End Time: </label>
                     <input
                         type="datetime-local"
                         value={endTime}
@@ -89,7 +85,7 @@ const ReservationForm = () => {
                     />
                 </div>
                 <div>
-                    <label>Total Price:</label>
+                    <label>Total Price: </label>
                     <input type="text" value={`$${totalPrice.toFixed(2)}`} readOnly />
                 </div>
                 <button type="submit">Reserve</button>
