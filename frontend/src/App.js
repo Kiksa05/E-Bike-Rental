@@ -3,6 +3,7 @@ import Dashboard from './components/Dashboard';
 import LoginForm from './components/LoginForm';
 import RegisterForm from './components/RegisterForm'; // Ensure the correct path
 import ReservationForm from './components/ReservationForm';
+import Footer from './components/Footer';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import AdminDashboard from './components/AdminDashboard';
@@ -22,6 +23,8 @@ function App() {
           </Routes>
         </Router>
       </header>
+
+      <Footer />
     </div>
   );
 }

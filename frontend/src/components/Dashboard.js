@@ -1,6 +1,5 @@
 import React from 'react';
 import './Dashboard.css';
-import Footer from './Footer';
 import Reviews from './Reviews';
 import BikeOffer from './BikeOffer';
 
@@ -24,7 +23,6 @@ const Dashboard = () => {
                     referrerPolicy="no-referrer-when-downgrade"
                 ></iframe></div>
             <Reviews />
-            <Footer />
         </div>
     );
 };

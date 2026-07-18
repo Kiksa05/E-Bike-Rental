@@ -1,5 +1,5 @@
 .home-testimonial {
-    height: 380px
+    height: 250px
 }
 
 .home-testimonial-bottom {
@@ -7,8 +7,8 @@
     margin-top: 20px;
     margin-bottom: 20px;
     position: relative;
-    height: 130px;
-    top: 190px
+    height: 10px;
+    top: 150px
 }
 
 .home-testimonial h3 {
