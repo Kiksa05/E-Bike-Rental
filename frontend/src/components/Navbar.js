@@ -29,7 +29,7 @@ const Navbar = () => {
 
     return (
         <nav className="navbar">
-            <h1>EcoRide Rentals</h1>
+            <h1><Link to="/">EcoRide Rentals</Link></h1>
             <button
                 className='hamburger'
                 onClick={() => setIsMenuOpen(!isMenuOpen)}>

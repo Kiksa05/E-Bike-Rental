@@ -15,6 +15,16 @@
     font-size: 30px;
 }
 
+a {
+    color: white;
+    text-decoration: none;
+}
+
+.navbar h1 a {
+    color: white;
+    text-decoration: none;
+}
+
 .nav-links {
     list-style: none;
     display: flex;
@@ -26,8 +36,6 @@
 }
 
 .nav-links a {
-    color: white;
-    text-decoration: none;
     position: relative;
     padding-bottom: 5px;
     display: inline-block;
