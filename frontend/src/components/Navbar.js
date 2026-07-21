@@ -6,6 +6,7 @@ const Navbar = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [isAdmin, setIsAdmin] = useState(false);
     const navigate = useNavigate();
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     useEffect(() => {
         const loggedIn = sessionStorage.getItem('userId') && sessionStorage.getItem('userRole');
@@ -20,6 +21,8 @@ const Navbar = () => {
         sessionStorage.removeItem('userRole');
         setIsLoggedIn(false);
         setIsAdmin(false);
+        setIsMenuOpen(false);
+
         navigate('/login');
         window.location.reload();
     };
@@ -27,24 +30,31 @@ const Navbar = () => {
     return (
         <nav className="navbar">
             <h1>EcoRide Rentals</h1>
-            <ul>
+            <button
+                className='hamburger'
+                onClick={() => setIsMenuOpen(!isMenuOpen)}>
+                ☰
+            </button>
+
+
+            <ul className={isMenuOpen ? "nav-links open" : "nav-links"}>
                 {!isLoggedIn ? (
                     <>
                         <li>
-                            <Link to="/register">Register</Link>
+                            <Link to="/register" onClick={() => setIsMenuOpen(false)}>Register</Link>
                         </li>
                         <li>
-                            <Link to="/login">Login</Link>
+                            <Link to="/login" onClick={() => setIsMenuOpen(false)}>Login</Link>
                         </li>
                     </>
                 ) : (
                     <>
                         <li>
-                            <Link to="/">Dashboard</Link>
+                            <Link to="/" onClick={() => setIsMenuOpen(false)}>Dashboard</Link>
                         </li>
                         {isAdmin && (
                             <li>
-                                <Link to="/admin">Admin Dashboard</Link>
+                                <Link to="/admin" onClick={() => setIsMenuOpen(false)}>Admin Dashboard</Link>
                             </li>
                         )}
                         <li>
