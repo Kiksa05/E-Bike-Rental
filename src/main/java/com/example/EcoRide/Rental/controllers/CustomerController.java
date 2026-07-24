@@ -5,10 +5,12 @@ import com.example.EcoRide.Rental.dao.CustomerDao;
 import com.example.EcoRide.Rental.service.Email;
 import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -26,6 +28,7 @@ public class CustomerController {
     @Autowired
     private Email emailService;
 
+    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @GetMapping("/{id}")
     public Customer getCustomerById(@PathVariable int id) {
@@ -38,20 +41,54 @@ public class CustomerController {
     }
 
     @PostMapping
-    public void saveCustomer(@RequestBody Customer customer) {
-        customerDao.save(customer);
+    public ResponseEntity<?> saveCustomer(@RequestBody Customer customer) {
+        String email = normalizeEmail(customer.getEmail());
+        if (email == null || email.isBlank()) {
+            return new ResponseEntity<>("Email is required", HttpStatus.BAD_REQUEST);
+        }
+        if (customer.getPassword() == null || customer.getPassword().isBlank()) {
+            return new ResponseEntity<>("Password is required", HttpStatus.BAD_REQUEST);
+        }
+        if (customerDao.existsByEmailIgnoreCase(email)) {
+            return new ResponseEntity<>("Email already in use", HttpStatus.BAD_REQUEST);
+        }
+
+        customer.setEmail(email);
+        customer.setPassword(passwordEncoder.encode(customer.getPassword()));
+
+        try {
+            return new ResponseEntity<>(customerDao.save(customer), HttpStatus.CREATED);
+        } catch (DataIntegrityViolationException e) {
+            return new ResponseEntity<>("Email already in use", HttpStatus.BAD_REQUEST);
+        }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Customer> updateCustomer(@PathVariable int id, @RequestBody Customer customerDetails) {
+    public ResponseEntity<?> updateCustomer(@PathVariable int id, @RequestBody Customer customerDetails) {
         Customer customer = customerDao.findById(id).orElse(null);
-        if(customer != null){
+        if (customer != null) {
+            String email = normalizeEmail(customerDetails.getEmail());
+            if (email == null || email.isBlank()) {
+                return new ResponseEntity<>("Email is required", HttpStatus.BAD_REQUEST);
+            }
+            if (customerDao.existsByEmailIgnoreCaseAndIdNot(email, id)) {
+                return new ResponseEntity<>("Email already in use", HttpStatus.BAD_REQUEST);
+            }
+
             customer.setName(customerDetails.getName());
-            customer.setEmail(customerDetails.getEmail());
+            customer.setEmail(email);
             customer.setPhone(customerDetails.getPhone());
             customer.setAccountBalance(customerDetails.getAccountBalance());
-            customer.setPassword(customerDetails.getPassword());
-            return new ResponseEntity<>(customerDao.save(customer), HttpStatus.OK);
+
+            if (customerDetails.getPassword() != null && !customerDetails.getPassword().isBlank()) {
+                customer.setPassword(passwordEncoder.encode(customerDetails.getPassword()));
+            }
+
+            try {
+                return new ResponseEntity<>(customerDao.save(customer), HttpStatus.OK);
+            } catch (DataIntegrityViolationException e) {
+                return new ResponseEntity<>("Email already in use", HttpStatus.BAD_REQUEST);
+            }
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
@@ -68,25 +105,38 @@ public class CustomerController {
 
     @PostMapping("/register")
     public ResponseEntity<String> registerCustomer(@RequestBody Customer customer) {
-        String email = customer.getEmail();
+        String email = normalizeEmail(customer.getEmail());
+        if (email == null || email.isBlank()) {
+            return new ResponseEntity<>("Email is required", HttpStatus.BAD_REQUEST);
+        }
+        if (customer.getPassword() == null || customer.getPassword().isBlank()) {
+            return new ResponseEntity<>("Password is required", HttpStatus.BAD_REQUEST);
+        }
+
         String role = email.equalsIgnoreCase("kiksa@admin.com") ? "admin" : "user";
-//        customer.setRole(role);
+        // customer.setRole(role);
         // Check if email already exists
-        if (customerDao.findByEmail(customer.getEmail()) != null) {
+        if (customerDao.existsByEmailIgnoreCase(email)) {
             return new ResponseEntity<>("Email already in use", HttpStatus.BAD_REQUEST);
         }
 
+        customer.setEmail(email);
         customer.setRole(role);
-        // Save the customer with plain text password (not recommended for production)
-        customerDao.save(customer);
+        customer.setPassword(passwordEncoder.encode(customer.getPassword()));
+
+        try {
+            customerDao.save(customer);
+        } catch (DataIntegrityViolationException e) {
+            return new ResponseEntity<>("Email already in use", HttpStatus.BAD_REQUEST);
+        }
 
         // Send registration email with PDF attachment
-//        try {
-//            emailService.sendRegistrationEmail(customer.getEmail(), customer.getName());
-//        } catch (MessagingException | IOException e) {
-//            e.printStackTrace();
-//            return ResponseEntity.status(500).body("Failed to send email");
-//        }
+        // try {
+        // emailService.sendRegistrationEmail(customer.getEmail(), customer.getName());
+        // } catch (MessagingException | IOException e) {
+        // e.printStackTrace();
+        // return ResponseEntity.status(500).body("Failed to send email");
+        // }
 
         return new ResponseEntity<>("Registration successful", HttpStatus.OK);
     }
@@ -94,8 +144,13 @@ public class CustomerController {
     @PostMapping("/login")
     public ResponseEntity<?> loginCustomer(@RequestBody Customer customer) {
         // Find customer by email
-        Customer existingCustomer = customerDao.findByEmail(customer.getEmail());
-        if (existingCustomer == null || !customer.getPassword().equals(existingCustomer.getPassword())) {
+        if (customer.getPassword() == null || customer.getPassword().isBlank()) {
+            return new ResponseEntity<>("Invalid email or password", HttpStatus.UNAUTHORIZED);
+        }
+
+        Customer existingCustomer = customerDao.findByEmailIgnoreCase(normalizeEmail(customer.getEmail()));
+        if (existingCustomer == null
+                || !passwordEncoder.matches(customer.getPassword(), existingCustomer.getPassword())) {
             return new ResponseEntity<>("Invalid email or password", HttpStatus.UNAUTHORIZED);
         }
 
@@ -105,6 +160,10 @@ public class CustomerController {
         response.put("userName", existingCustomer.getName());
 
         return ResponseEntity.ok(response);
+    }
+
+    private String normalizeEmail(String email) {
+        return email == null ? null : email.trim().toLowerCase();
     }
 
 }

@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 
-import java.util.List;
 //DONE
 @Repository
 public interface CustomerDao extends JpaRepository<Customer, Integer> {
@@ -16,5 +15,8 @@ public interface CustomerDao extends JpaRepository<Customer, Integer> {
 //    void updateCustomer(Customer customer);
 //    void deleteCustomer(int id);
     Customer findByEmail(String email);
+    Customer findByEmailIgnoreCase(String email);
+    boolean existsByEmailIgnoreCase(String email);
+    boolean existsByEmailIgnoreCaseAndIdNot(String email, int id);
 }
 

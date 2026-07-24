@@ -30,7 +30,7 @@ SET time_zone = "+00:00";
 CREATE TABLE `customer` (
   `id` int(11) NOT NULL,
   `name` varchar(255) DEFAULT NULL,
-  `email` varchar(255) DEFAULT NULL,
+  `email` varchar(255) NOT NULL,
   `phone` varchar(255) DEFAULT NULL,
   `account_balance` double DEFAULT NULL,
   `password` varchar(255) DEFAULT NULL,
@@ -42,11 +42,11 @@ CREATE TABLE `customer` (
 --
 
 INSERT INTO `customer` (`id`, `name`, `email`, `phone`, `account_balance`, `password`, `role`) VALUES
-(1, 'Kristijan Stefanoski', 'stefanoskii.kristijan@gmail.com', '069817202', 0, '123kiksa', 'user'),
-(2, 'Admin Kiksa', 'kiksa@admin.com', '1234567890', 0, '123kiksa', 'admin'),
-(3, 'Kristijan Stefanoski', 'kiksastefan@gmail.com', '077869899', 0, '123123', 'user'),
-(4, 'Kristijan Stefanoski', 'stefanoskii.kristijan1@gmail.com', '069817202', 0, '1231321', 'user'),
-(5, 'Kristijan Stefanoski', '1stefanoskii.kristijan@gmail.com', '069817202', 0, '123123', 'user');
+(1, 'Kristijan Stefanoski', 'stefanoskii.kristijan@gmail.com', '069817202', 0, '$2a$12$VOpt4k2BhQNvnpLL9th8quGcOcY2tVbNUeSpKYu6cJfXyO8rKuUa.', 'user'),
+(2, 'Admin Kiksa', 'kiksa@admin.com', '1234567890', 0, '$2a$12$VOpt4k2BhQNvnpLL9th8quGcOcY2tVbNUeSpKYu6cJfXyO8rKuUa.', 'admin'),
+(3, 'Kristijan Stefanoski', 'kiksastefan@gmail.com', '077869899', 0, '$2a$12$JWWgwqeA/PN.sMDZIbCvDe5kYTCFl5y1Y87zxhGMeGAkvF10Apdau', 'user'),
+(4, 'Kristijan Stefanoski', 'stefanoskii.kristijan1@gmail.com', '069817202', 0, '$2a$12$qm0TJq2U44fZ/cqCMTmqg.V1Xy.WPX/JBtPTjUoNWgyU2ljsYwAE.', 'user'),
+(5, 'Kristijan Stefanoski', '1stefanoskii.kristijan@gmail.com', '069817202', 0, '$2a$12$JWWgwqeA/PN.sMDZIbCvDe5kYTCFl5y1Y87zxhGMeGAkvF10Apdau', 'user');
 
 -- --------------------------------------------------------
 
@@ -136,7 +136,8 @@ INSERT INTO `station` (`id`, `location`) VALUES
 -- Indexes for table `customer`
 --
 ALTER TABLE `customer`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uk_customer_email` (`email`);
 
 --
 -- Indexes for table `ebike`
