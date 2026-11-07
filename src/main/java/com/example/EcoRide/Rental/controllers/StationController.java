@@ -27,17 +27,20 @@ public class StationController {
         return stationDao.findAll();
     }
 
+    public record StationRequest(String location) {}
+
     @PostMapping
-    public void saveStation(@RequestBody Station station) {
+    public void saveStation(@RequestBody StationRequest request) {
+        Station station = new Station();
+        station.setLocation(request.location());
         stationDao.save(station);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Station> updateStation(@PathVariable int id, @RequestBody Station stationDetails) {
+    public ResponseEntity<Station> updateStation(@PathVariable int id, @RequestBody StationRequest request) {
         Station station = stationDao.findById(id).orElse(null);
         if (station != null) {
-            station.setLocation(stationDetails.getLocation());
-            station.setAvailableBikes(stationDetails.getAvailableBikes());
+            station.setLocation(request.location());
             return new ResponseEntity<>(stationDao.save(station), HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);

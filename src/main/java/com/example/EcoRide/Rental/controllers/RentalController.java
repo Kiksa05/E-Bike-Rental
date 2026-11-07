@@ -47,28 +47,26 @@ public class RentalController {
         return rentalDao.findAll();
     }
 
-    @PostMapping
-    public void saveRental(@RequestBody Rental rental) {
-        rentalDao.save(rental);
-    }
+    public record IdRef(int id) {}
+
+    public record ReservationRequest(IdRef customer, IdRef ebike, LocalDateTime rentalStartTime,
+                                     LocalDateTime rentalEndTime, String passportNumber) {}
 
     @PostMapping("/pending")
-    public ResponseEntity<String> createPendingReservation(@RequestBody Rental rental) {
-        System.out.println("Received rental object: " + rental);
-
-        if (rental.getCustomer() == null || rental.getCustomer().getId() == 0) {
+    public ResponseEntity<String> createPendingReservation(@RequestBody ReservationRequest request) {
+        if (request.customer() == null || request.customer().id() == 0) {
             return new ResponseEntity<>("Customer ID is required", HttpStatus.BAD_REQUEST);
         }
-        if (rental.getEbike() == null || rental.getEbike().getId() == 0) {
+        if (request.ebike() == null || request.ebike().id() == 0) {
             return new ResponseEntity<>("Ebike ID is required", HttpStatus.BAD_REQUEST);
         }
-        if (rental.getPassportNumber() == null || rental.getPassportNumber().isEmpty()) {
+        if (request.passportNumber() == null || request.passportNumber().isEmpty()) {
             return new ResponseEntity<>("Passport number is required", HttpStatus.BAD_REQUEST);
         }
 
         // Fetch the customer and ebike from the base
-        Customer customer = customerDao.findById(rental.getCustomer().getId()).orElse(null);
-        Ebike ebike = ebikeDao.findById(rental.getEbike().getId()).orElse(null);
+        Customer customer = customerDao.findById(request.customer().id()).orElse(null);
+        Ebike ebike = ebikeDao.findById(request.ebike().id()).orElse(null);
 
         if (customer == null) {
             return new ResponseEntity<>("Customer not found", HttpStatus.BAD_REQUEST);
@@ -77,8 +75,12 @@ public class RentalController {
             return new ResponseEntity<>("Ebike not found", HttpStatus.BAD_REQUEST);
         }
 
+        Rental rental = new Rental();
         rental.setCustomer(customer);
         rental.setEbike(ebike);
+        rental.setRentalStartTime(request.rentalStartTime());
+        rental.setRentalEndTime(request.rentalEndTime());
+        rental.setPassportNumber(request.passportNumber());
         rental.setRentalStatus("Pending");
         rentalDao.save(rental);
         return new ResponseEntity<>("Reservation created successfully and is pending approval.", HttpStatus.CREATED);
@@ -120,21 +122,6 @@ public class RentalController {
         return new ResponseEntity<>("Rental rejected", HttpStatus.OK);
     }
 
-
-    @PutMapping
-    public ResponseEntity<Rental> updateRental(@PathVariable int id,@RequestBody Rental rentalDetails) {
-        Rental rental = rentalDao.findById(id).orElse(null);
-        if (rental != null) {
-        rental.setCustomer(rentalDetails.getCustomer());
-        rental.setEbike(rentalDetails.getEbike());
-        rental.setRentalStartTime(rentalDetails.getRentalStartTime());
-        rental.setRentalEndTime(rentalDetails.getRentalEndTime());
-        rental.setRentalStatus(rentalDetails.getRentalStatus());
-        rental.setPassportNumber(rentalDetails.getPassportNumber());
-        return new ResponseEntity<>(rentalDao.save(rental), HttpStatus.OK);
-    }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-}
 
     @DeleteMapping("/{id}")
     @Transactional

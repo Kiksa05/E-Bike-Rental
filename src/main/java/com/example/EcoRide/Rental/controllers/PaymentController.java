@@ -27,21 +27,27 @@ public class PaymentController {
         return paymentDao.findAll();
     }
 
+    public record PaymentRequest(int rentalId, double amount, String paymentStatus) {}
+
     @PostMapping
-    public void savePayment(@RequestBody Payment payment) {
-        paymentDao.save(payment);
+    public void savePayment(@RequestBody PaymentRequest request) {
+        paymentDao.save(apply(request, new Payment()));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Payment> updatePayment(@PathVariable int id, @RequestBody Payment paymentDetails) {
+    public ResponseEntity<Payment> updatePayment(@PathVariable int id, @RequestBody PaymentRequest request) {
         Payment payment = paymentDao.findById(id).orElse(null);
         if (payment != null) {
-            payment.setRentalId(paymentDetails.getRentalId());
-            payment.setAmount(paymentDetails.getAmount());
-            payment.setPaymentStatus(paymentDetails.getPaymentStatus());
-            return new ResponseEntity<>(paymentDao.save(payment), HttpStatus.OK);
+            return new ResponseEntity<>(paymentDao.save(apply(request, payment)), HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    private Payment apply(PaymentRequest request, Payment payment) {
+        payment.setRentalId(request.rentalId());
+        payment.setAmount(request.amount());
+        payment.setPaymentStatus(request.paymentStatus());
+        return payment;
     }
 
     @DeleteMapping("/{id}")

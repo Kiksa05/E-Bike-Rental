@@ -46,23 +46,28 @@ public class EbikeController {
 
 
 
+    public record EbikeRequest(String model, double batteryLevel, String status, double price) {}
+
     @PostMapping
-    public void saveEbike(@RequestBody Ebike ebike) {
-        ebikeDao.save(ebike);
+    public void saveEbike(@RequestBody EbikeRequest request) {
+        ebikeDao.save(apply(request, new Ebike()));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Ebike> updateEbike(@PathVariable int id, @RequestBody Ebike ebikeDetails) {
+    public ResponseEntity<Ebike> updateEbike(@PathVariable int id, @RequestBody EbikeRequest request) {
         Ebike ebike = ebikeDao.findById(id).orElse(null);
         if (ebike != null) {
-            ebike.setModel(ebikeDetails.getModel());
-            ebike.setBatteryLevel(ebikeDetails.getBatteryLevel());
-            ebike.setStatus(ebikeDetails.getStatus());
-            ebike.setStation(ebikeDetails.getStation());
-            ebike.setPrice(ebikeDetails.getPrice());
-            return new ResponseEntity<>(ebikeDao.save(ebike), HttpStatus.OK);
+            return new ResponseEntity<>(ebikeDao.save(apply(request, ebike)), HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    private Ebike apply(EbikeRequest request, Ebike ebike) {
+        ebike.setModel(request.model());
+        ebike.setBatteryLevel(request.batteryLevel());
+        ebike.setStatus(request.status());
+        ebike.setPrice(request.price());
+        return ebike;
     }
 
     @DeleteMapping("/{id}")
