@@ -5,7 +5,7 @@ EcoRide Rental System is a full-stack web application that allows customers to b
 ## Features
 
 ### Customer
-- Register a new account
+- Register a new account (passwords hashed with BCrypt, unique email enforced)
 - Log in securely
 - Browse available e-bikes
 - Reserve an e-bike
@@ -64,6 +64,29 @@ Before running the project, ensure you have installed:
 
 ---
 
+## Run with Docker
+
+The quickest way to start everything (requires Docker Desktop):
+
+```bash
+docker compose up -d --build
+```
+
+| Service | Address |
+|---|---|
+| Frontend | http://localhost:3000 |
+| Backend | http://localhost:8081 |
+| MySQL | `127.0.0.1:3307` (user `root`, password `root`) |
+
+Demo logins, both with the password `demo1234`: `kiksa@admin.com` (admin) and `user@demo.local` (user).
+
+- `docker compose down` stops everything and keeps the data.
+- `docker compose down -v` also deletes the data, so the next start reloads `database/demo.sql`.
+
+Email sending is currently disabled. If you enable it, provide the Gmail app password through the `MAIL_PASSWORD` environment variable and never commit it.
+
+---
+
 ## Getting Started
 
 ### 1. Clone the repository
@@ -81,6 +104,8 @@ Create a MySQL database named:
 ```text
 ecoride-rental
 ```
+
+Import `database/demo.sql` into it to get the demo accounts, bikes and stations. Skip this if the tables already exist.
 
 Update the database credentials in:
 
@@ -165,7 +190,6 @@ http://localhost:3000
 ## Future Improvements
 
 - JWT authentication
-- Password encryption
 - Email notifications
 - User profile management
 - Interactive station map
