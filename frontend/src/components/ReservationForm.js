@@ -1,114 +1,115 @@
-import React, { useState, useEffect } from 'react';
-import api from '../services/api';
-import { useNavigate, useLocation } from 'react-router-dom';
+import React, { useState } from 'react';
+import api, { errorMessage } from '../services/api';
+import { rentalPrice, toLocalInput, nextHour } from '../services/rental';
+import { getImage } from './BikeOffer';
+import { Navigate, useNavigate, useLocation } from 'react-router-dom';
+import Swal from 'sweetalert2';
 import './RegisterForm.css';
 
 const ReservationForm = () => {
     const location = useLocation();
     const navigate = useNavigate();
-    const { ebikeId, ebikeName, customerId, customerName, pricePerDay } = location.state || {};
+    const { ebikeId, ebikeName, pricePerDay } = location.state || {};
 
     const [passportNumber, setPassportNumber] = useState('');
-    const [startTime, setStartTime] = useState('');
-    const [endTime, setEndTime] = useState('');
-    const [totalPrice, setTotalPrice] = useState(0);
+    const [startTime, setStartTime] = useState(() => toLocalInput(new Date()));
+    const [endTime, setEndTime] = useState(() => toLocalInput(nextHour(new Date())));
 
+    if (!sessionStorage.getItem('token')) {
+        return <Navigate to="/login" replace state={{ message: 'Log in to rent a bike.' }} />;
+    }
+    if (!ebikeId) {
+        return <Navigate to="/" replace />;
+    }
 
-    useEffect(() => {
-        const now = new Date();
-        const defaultEndTime = new Date(now.getTime() + 60 * 60 * 1000);
-        setStartTime(now.toISOString().substring(0, 16));
-        setEndTime(defaultEndTime.toISOString().substring(0, 16));
-    }, []);
-
-    useEffect(() => {
-        if (startTime && endTime) {
-            const start = new Date(startTime);
-            const end = new Date(endTime);
-            const diffTime = Math.abs(end - start);
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            setTotalPrice(diffDays * pricePerDay);
-        }
-    }, [startTime, endTime, pricePerDay]);
+    const timesInOrder = new Date(endTime) > new Date(startTime);
+    const image = getImage(ebikeId);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!timesInOrder) {
+            return;
+        }
         try {
             await api.post('/rentals/pending', {
-                customer: { id: parseInt(customerId) }, // Ensure this is a number
-                ebike: { id: parseInt(ebikeId) }, // Ensure this is a number
+                ebike: { id: ebikeId },
                 rentalStartTime: startTime,
                 rentalEndTime: endTime,
                 passportNumber: passportNumber,
-                rentalStatus: 'Pending',
             });
-            alert('Reservation created successfully, please wait on admin to approve it!');
-            navigate('/'); // Redirect to home or another page after successful reservation
+            Swal.fire({
+                title: 'Reservation sent',
+                text: `We'll review your ${ebikeName} reservation and confirm it before you ride.`,
+                icon: 'success',
+                iconColor: '#1a7346',
+                confirmButtonText: 'Back to bikes',
+                confirmButtonColor: '#123d2c',
+            }).then(() => navigate('/'));
         } catch (error) {
             console.error('Error creating reservation:', error);
+            Swal.fire({
+                title: 'Reservation not sent',
+                text: errorMessage(error, 'The server could not be reached. Try again in a moment.'),
+                icon: 'error',
+                confirmButtonColor: '#123d2c',
+            });
         }
     };
 
     return (
-        <div className="auth-container">
-            <div className="auth-card">
-            <h2>Reserve {ebikeName}</h2>
-            <form onSubmit={handleSubmit}>
-                <div className="form-group">
-                    <label>Customer Name: </label>
-                    <input type="text" value={customerName} readOnly />
-                </div>
-                <div className="form-group">
-                        <label>Passport Number:</label>
+        <div className="reserve">
+            <aside className="reserve-summary">
+                {image && <img src={image} alt={ebikeName} />}
+                <p className="reserve-total">
+                    <span>Total</span>
+                    <strong aria-live="polite">${rentalPrice(startTime, endTime, pricePerDay).toFixed(2)}</strong>
+                </p>
+                <p className="reserve-rate">${pricePerDay} per day, charged for each hour you start.</p>
+            </aside>
+
+            <div className="reserve-form">
+                <h1>Reserve {ebikeName}</h1>
+                <p className="reserve-as">Reserving as {sessionStorage.getItem('userName')}</p>
+                <form className="auth-form" onSubmit={handleSubmit}>
+                    <label className="form-group">
+                        <span>Passport number</span>
                         <input
                             type="text"
                             value={passportNumber}
                             onChange={(e) => setPassportNumber(e.target.value)}
                             required
                         />
+                    </label>
+
+                    <div className="form-row">
+                        <label className="form-group">
+                            <span>Start</span>
+                            <input
+                                type="datetime-local"
+                                value={startTime}
+                                onChange={(e) => setStartTime(e.target.value)}
+                                required
+                            />
+                        </label>
+
+                        <label className="form-group">
+                            <span>End</span>
+                            <input
+                                type="datetime-local"
+                                value={endTime}
+                                onChange={(e) => setEndTime(e.target.value)}
+                                required
+                            />
+                        </label>
                     </div>
 
-
-                    <div className="form-group">
-                        <label>Start Time:</label>
-                        <input
-                            type="datetime-local"
-                            value={startTime}
-                            onChange={(e) => setStartTime(e.target.value)}
-                            required
-                        />
-                    </div>
-
-
-                    <div className="form-group">
-                        <label>End Time:</label>
-                        <input
-                            type="datetime-local"
-                            value={endTime}
-                            onChange={(e) => setEndTime(e.target.value)}
-                            required
-                        />
-                    </div>
-
-
-                    <div className="form-group">
-                        <label>Total Price:</label>
-                        <input
-                            type="text"
-                            value={`$${totalPrice.toFixed(2)}`}
-                            readOnly
-                        />
-                    </div>
-
+                    {!timesInOrder && <p className="form-error" role="alert">The end time must be after the start time.</p>}
 
                     <button className="auth-button" type="submit">
-                        Reserve
+                        Send reservation
                     </button>
-
                 </form>
-
             </div>
-
         </div>
     );
 };

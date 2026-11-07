@@ -51,7 +51,6 @@ CREATE TABLE `payment` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- kiksa@admin.com is seeded because CustomerController makes whoever registers that email an admin.
 INSERT INTO `customer` (`name`, `email`, `phone`, `account_balance`, `password`, `role`) VALUES
 ('Demo Admin', 'kiksa@admin.com', '000000000', 0, '$2a$12$5mONSnOP6yxHdIf26hgxO.6ZcJt446t2oSFn435NvwmVDcrExAiTG', 'admin'),
 ('Demo User', 'user@demo.local', '000000001', 0, '$2a$12$5mONSnOP6yxHdIf26hgxO.6ZcJt446t2oSFn435NvwmVDcrExAiTG', 'user');

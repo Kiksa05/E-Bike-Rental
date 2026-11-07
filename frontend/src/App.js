@@ -11,9 +11,9 @@ import AdminDashboard from './components/AdminDashboard';
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <Router>
-          <Navbar />
+      <Router>
+        <Navbar />
+        <main className="App-main">
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/register" element={<RegisterForm />} />
@@ -21,8 +21,8 @@ function App() {
             <Route path="/reserve/:id" element={<ReservationForm />} />
             <Route path="/admin" element={<AdminDashboard />} />
           </Routes>
-        </Router>
-      </header>
+        </main>
+      </Router>
 
       <Footer />
     </div>

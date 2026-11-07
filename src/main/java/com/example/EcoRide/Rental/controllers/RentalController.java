@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -49,14 +50,12 @@ public class RentalController {
 
     public record IdRef(int id) {}
 
-    public record ReservationRequest(IdRef customer, IdRef ebike, LocalDateTime rentalStartTime,
+    public record ReservationRequest(IdRef ebike, LocalDateTime rentalStartTime,
                                      LocalDateTime rentalEndTime, String passportNumber) {}
 
     @PostMapping("/pending")
-    public ResponseEntity<String> createPendingReservation(@RequestBody ReservationRequest request) {
-        if (request.customer() == null || request.customer().id() == 0) {
-            return new ResponseEntity<>("Customer ID is required", HttpStatus.BAD_REQUEST);
-        }
+    public ResponseEntity<String> createPendingReservation(@RequestBody ReservationRequest request,
+                                                           Authentication authentication) {
         if (request.ebike() == null || request.ebike().id() == 0) {
             return new ResponseEntity<>("Ebike ID is required", HttpStatus.BAD_REQUEST);
         }
@@ -64,8 +63,13 @@ public class RentalController {
             return new ResponseEntity<>("Passport number is required", HttpStatus.BAD_REQUEST);
         }
 
-        // Fetch the customer and ebike from the base
-        Customer customer = customerDao.findById(request.customer().id()).orElse(null);
+        if (request.rentalStartTime() == null || request.rentalEndTime() == null
+                || !request.rentalEndTime().isAfter(request.rentalStartTime())) {
+            return new ResponseEntity<>("End time must be after the start time", HttpStatus.BAD_REQUEST);
+        }
+
+        // The customer comes from the signed token, so nobody can reserve as someone else.
+        Customer customer = customerDao.findById(Integer.parseInt(authentication.getName())).orElse(null);
         Ebike ebike = ebikeDao.findById(request.ebike().id()).orElse(null);
 
         if (customer == null) {

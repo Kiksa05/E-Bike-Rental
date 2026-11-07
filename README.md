@@ -66,7 +66,7 @@ Before running the project, ensure you have installed:
 
 ## Run with Docker
 
-The quickest way to start everything (requires Docker Desktop):
+The quickest way to start everything (requires Docker Desktop). First copy `.env.example` to `.env` and set `JWT_SECRET` to a long random value of at least 32 characters, then run:
 
 ```bash
 docker compose up -d --build
@@ -106,6 +106,14 @@ ecoride-rental
 ```
 
 Import `database/demo.sql` into it to get the demo accounts, bikes and stations. Skip this if the tables already exist.
+
+Copy `.env.example` to `.env` in the project root and set `JWT_SECRET`. The backend will not start without it.
+
+New accounts are always normal users. To make someone an admin, set it in the database:
+
+```sql
+UPDATE customer SET role = 'admin' WHERE email = 'someone@example.com';
+```
 
 Update the database credentials in:
 
@@ -189,7 +197,6 @@ http://localhost:3000
 
 ## Future Improvements
 
-- JWT authentication
 - Email notifications
 - User profile management
 - Interactive station map

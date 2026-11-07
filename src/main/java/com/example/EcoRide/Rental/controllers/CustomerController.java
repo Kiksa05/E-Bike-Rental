@@ -8,11 +8,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
+import org.springframework.security.oauth2.jwt.JwsHeader;
+import org.springframework.security.oauth2.jwt.JwtClaimsSet;
+import org.springframework.security.oauth2.jwt.JwtEncoder;
+import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,11 +29,16 @@ import java.util.Map;
 @CrossOrigin
 public class CustomerController {
 
+    private static final Duration TOKEN_LIFETIME = Duration.ofHours(2);
+
     @Autowired
     private CustomerDao customerDao;
 
     @Autowired
     private Email emailService;
+
+    @Autowired
+    private JwtEncoder jwtEncoder;
 
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
@@ -93,8 +105,6 @@ public class CustomerController {
             return new ResponseEntity<>("Password is required", HttpStatus.BAD_REQUEST);
         }
 
-        String role = email.equalsIgnoreCase("kiksa@admin.com") ? "admin" : "user";
-        // customer.setRole(role);
         // Check if email already exists
         if (customerDao.existsByEmailIgnoreCase(email)) {
             return new ResponseEntity<>("Email already in use", HttpStatus.BAD_REQUEST);
@@ -102,7 +112,8 @@ public class CustomerController {
 
         Customer customer = new Customer(request.name(), request.phone());
         customer.setEmail(email);
-        customer.setRole(role);
+        // New accounts are never admins; admins are set directly in the database.
+        customer.setRole("user");
         customer.setPassword(passwordEncoder.encode(request.password()));
 
         try {
@@ -137,12 +148,28 @@ public class CustomerController {
             return new ResponseEntity<>("Invalid email or password", HttpStatus.UNAUTHORIZED);
         }
 
+        String role = existingCustomer.getRole() == null ? "user" : existingCustomer.getRole();
+
         Map<String, String> response = new HashMap<>();
+        response.put("token", createToken(existingCustomer.getId(), role));
         response.put("userId", String.valueOf(existingCustomer.getId()));
-        response.put("userRole", existingCustomer.getRole());
+        response.put("userRole", role);
         response.put("userName", existingCustomer.getName());
 
         return ResponseEntity.ok(response);
+    }
+
+    // shortcut: tokens stay valid until they expire even after logout, add a revocation list if that becomes a problem.
+    private String createToken(int customerId, String role) {
+        Instant now = Instant.now();
+        JwtClaimsSet claims = JwtClaimsSet.builder()
+                .subject(String.valueOf(customerId))
+                .claim("role", role)
+                .issuedAt(now)
+                .expiresAt(now.plus(TOKEN_LIFETIME))
+                .build();
+        JwsHeader header = JwsHeader.with(MacAlgorithm.HS256).build();
+        return jwtEncoder.encode(JwtEncoderParameters.from(header, claims)).getTokenValue();
     }
 
     private String normalizeEmail(String email) {

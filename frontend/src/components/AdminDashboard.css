@@ -1,0 +1,112 @@
+.admin-dashboard {
+    padding: 32px var(--gutter) 80px;
+}
+
+.admin-dashboard h1 {
+    font-size: clamp(32px, 4vw, 44px);
+    letter-spacing: -0.015em;
+    margin-bottom: 28px;
+}
+
+.admin-note {
+    color: var(--muted);
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.admin-table th {
+    padding: 10px 16px 10px 0;
+    font-size: 15px;
+    font-weight: 600;
+    text-align: left;
+    color: var(--muted);
+    border-bottom: 2px solid var(--forest);
+}
+
+.admin-table td {
+    padding: 16px 16px 16px 0;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--line);
+}
+
+.admin-actions {
+    white-space: nowrap;
+    text-align: right;
+}
+
+.admin-actions .auth-button {
+    margin: 0 0 0 8px;
+    padding: 9px 18px;
+    font-size: 15px;
+}
+
+.auth-button.secondary {
+    background: transparent;
+    color: var(--forest);
+    box-shadow: inset 0 0 0 1.5px var(--forest);
+}
+
+.auth-button.secondary:hover:not(:disabled) {
+    background: var(--mint);
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+/* Phones: each reservation becomes a labelled block instead of a cramped table. */
+@media (max-width: 760px) {
+    .admin-table thead {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+    }
+
+    .admin-table,
+    .admin-table tbody,
+    .admin-table tr,
+    .admin-table td {
+        display: block;
+    }
+
+    .admin-table tr {
+        padding: 16px 0;
+        border-bottom: 1px solid var(--line);
+    }
+
+    .admin-table td {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 4px 0;
+        border: none;
+        text-align: right;
+    }
+
+    .admin-table td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: var(--muted);
+        text-align: left;
+    }
+
+    .admin-table .admin-actions {
+        justify-content: flex-start;
+        padding-top: 12px;
+    }
+
+    .admin-actions .auth-button {
+        flex: 1;
+        margin: 0;
+    }
+}

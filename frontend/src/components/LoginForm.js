@@ -1,45 +1,45 @@
 import React, { useState } from 'react';
-import api from "../services/api";
-import { useNavigate } from "react-router-dom";
+import api, { errorMessage } from "../services/api";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import './RegisterForm.css';
 import Swal from 'sweetalert2';
-// import Footer from '../Footer/Footer';
 
 const LoginForm = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const navigate = useNavigate();
+    const message = useLocation().state?.message;
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
             const response = await api.post('/customers/login', { email, password });
-            const { userId, userRole, userName } = response.data;
+            const { token, userId, userRole, userName } = response.data;
+            sessionStorage.setItem('token', token);
             sessionStorage.setItem('userId', userId);
             sessionStorage.setItem('userRole', userRole);
             sessionStorage.setItem('userName', userName);
 
             Swal.fire({
-                            title: `Welcome back, ${userName}!`,
-                            icon: 'success',
-                            toast: true,
-                            position: 'top-end',
-                            showConfirmButton: false,
-                            timer: 2000,
-                            timerProgressBar: true
-            }).then(() => {
-                            navigate('/');
-                            window.location.reload();
+                title: `Welcome back, ${userName}!`,
+                icon: 'success',
+                iconColor: '#1a7346',
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 2000,
+                timerProgressBar: true
             });
+            navigate('/');
 
         } catch (error) {
             console.error('Login error:', error);
 
             Swal.fire({
-                            title: 'Login Failed',
-                            text: error.response?.data || 'Invalid email or password configuration.',
-                            icon: 'error',
-                            confirmButtonColor: '#d33'
+                title: 'Login failed',
+                text: errorMessage(error, 'The server could not be reached. Try again in a moment.'),
+                icon: 'error',
+                confirmButtonColor: '#123d2c'
             });
         }
     };
@@ -47,36 +47,38 @@ const LoginForm = () => {
     return (
         <div className="auth-container">
             <div className="auth-card">
-                <h2>Login</h2>
+                <h1>Log in</h1>
+                {message && <p className="auth-message" role="status">{message}</p>}
                 <form className="auth-form" onSubmit={handleSubmit}>
-                    <div className="form-group">
-                                        <label>Email</label>
-                                        <input
-                                            type="email"
-                                            value={email}
-                                            onChange={(e) => setEmail(e.target.value)}
-                                            required
-                                        />
-                                    </div>
+                    <label className="form-group">
+                        <span>Email</span>
+                        <input
+                            type="email"
+                            autoComplete="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                        />
+                    </label>
 
-                    <div className="form-group">
-                                        <label>Password</label>
-                                        <input
-                                            type="password"
-                                            value={password}
-                                            onChange={(e) => setPassword(e.target.value)}
-                                            required
-                                        />
-                                    </div>
+                    <label className="form-group">
+                        <span>Password</span>
+                        <input
+                            type="password"
+                            autoComplete="current-password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                        />
+                    </label>
 
-                    <button className="auth-button" type="submit">Sign In</button>
+                    <button className="auth-button" type="submit">Log in</button>
                 </form>
 
                 <div className="auth-link">
-                                Don't have an account? <a href="/register">Register</a>
+                    Don't have an account? <Link to="/register">Register</Link>
                 </div>
             </div>
-            {/* <Footer /> */}
         </div>
     );
 };

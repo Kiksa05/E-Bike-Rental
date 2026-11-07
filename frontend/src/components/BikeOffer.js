@@ -5,60 +5,83 @@ import { useState, useEffect } from 'react'
 import api from '../services/api'
 import { useNavigate } from 'react-router-dom'
 
+const BatteryGauge = ({ level }) => {
+    const filled = Math.round(level / 10);
+    return (
+        <div className={level < 30 ? 'battery low' : 'battery'}>
+            <div className="battery-cells" aria-hidden="true">
+                {Array.from({ length: 10 }, (_, i) => (
+                    <span key={i} className={i < filled ? 'on' : ''} />
+                ))}
+            </div>
+            <span>{level}% battery</span>
+        </div>
+    );
+};
+
 const BikeOffer = () => {
-    const [ebikes, setEbikes] = useState([]);
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [ebikes, setEbikes] = useState(null);
+    const [loadFailed, setLoadFailed] = useState(false);
     const navigate = useNavigate();
 
-    const fetchBikes = async () => {
-        try {
-            const response = await api.get('/ebikes');
-            console.log('API Response:', response.data);
-            setEbikes(response.data);
-        } catch (error) {
-            console.error('Error fetching bikes:', error);
-        }
-    };
-
     useEffect(() => {
-        const loggedIn = sessionStorage.getItem('userId') && sessionStorage.getItem('userRole');
-        setIsLoggedIn(loggedIn);
-
-        fetchBikes();
+        api.get('/ebikes')
+            .then((response) => setEbikes(response.data))
+            .catch((error) => {
+                console.error('Error fetching bikes:', error);
+                setLoadFailed(true);
+            });
     }, []);
 
     const handleRent = (ebike) => {
-        const customerName = sessionStorage.getItem('userName');
-        const customerId = sessionStorage.getItem('userId');
+        if (!sessionStorage.getItem('token')) {
+            navigate('/login', { state: { message: 'Log in to rent a bike.' } });
+            return;
+        }
         navigate(`/reserve/${ebike.id}`, {
             state: {
                 ebikeId: ebike.id,
                 ebikeName: ebike.model,
-                customerName: customerName,
-                customerId: customerId,
                 pricePerDay: ebike.price
             }
         });
     };
 
-
     return (
-        <div className="ebike-list">
-            {ebikes.map((ebike) => (
-                <div key={ebike.id} className="ebike-item">
-                    <h3>{ebike.model}</h3>
-                    <img src={getImage(ebike.id)} alt={ebike.model} />
-                    <p>Battery Level: {ebike.batteryLevel}%</p>
-                    <p>Price: {ebike.price}$ per day</p>
-                    <p style={{ color: ebike.status === "Available" ? "green" : "red" }}>{ebike.status}</p>
-                    <button className="auth-button" onClick={() => handleRent(ebike)} disabled={ebike.status !== "Available"}>Rent Now</button>
-                </div>
-            ))}
-        </div>
+        <section className="bikes" id="bikes">
+            <h2>Choose your bike</h2>
+            {loadFailed && <p className="bikes-note">The bikes could not be loaded. Refresh the page to try again.</p>}
+            {ebikes?.length === 0 && <p className="bikes-note">No bikes are listed right now. Check back soon.</p>}
+            <div className="ebike-list">
+                {ebikes?.map((ebike) => {
+                    const available = ebike.status === 'Available';
+                    const image = getImage(ebike.id);
+                    return (
+                        <article key={ebike.id} className={available ? 'ebike-item' : 'ebike-item unavailable'}>
+                            <div className="ebike-photo">
+                                {image ? <img src={image} alt={ebike.model} /> : <span>No photo yet</span>}
+                            </div>
+                            <div className="ebike-details">
+                                <h3>{ebike.model}</h3>
+                                <p className="ebike-price"><strong>${ebike.price}</strong> per day</p>
+                                <BatteryGauge level={ebike.batteryLevel} />
+                                <button
+                                    className="auth-button"
+                                    aria-label={available ? `Rent ${ebike.model}` : undefined}
+                                    onClick={() => handleRent(ebike)}
+                                    disabled={!available}>
+                                    {available ? 'Rent this bike' : 'Not available'}
+                                </button>
+                            </div>
+                        </article>
+                    );
+                })}
+            </div>
+        </section>
     );
 }
 
-const getImage = (id) => {
+export const getImage = (id) => {
     switch (id) {
         case 1:
             return img1;

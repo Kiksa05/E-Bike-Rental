@@ -2,70 +2,57 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    width: 100%;
-    box-sizing: border-box;
-    background-color: #333;
-    color: white;
-    padding: 1rem;
+    padding: 18px var(--gutter);
     position: relative;
 }
 
-.navbar h1 {
-    margin: 10px;
-    font-size: 30px;
-}
-
-a {
-    color: white;
-    text-decoration: none;
-}
-
-.navbar h1 a {
-    color: white;
+.navbar-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--display);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--forest);
     text-decoration: none;
 }
 
 .nav-links {
     list-style: none;
     display: flex;
-    margin: 10px;
+    align-items: center;
+    margin: 0;
     padding: 0;
-    gap: 2rem;
-    font-size: 18px;
-
+    gap: 28px;
 }
 
-.nav-links a {
-    position: relative;
-    padding-bottom: 5px;
+.nav-links a,
+.nav-logout {
     display: inline-block;
-    outline: none;
+    background: none;
+    border: none;
+    padding: 4px 0;
+    color: var(--forest);
+    font: inherit;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
 }
 
-
-.nav-links a::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    bottom: 0;
-
-    width: 0;
-    height: 2px;
-    background-color: white;
-
-    transition: width 0.3s ease;
-}
-
-.nav-links a:hover::after {
-    width: 100%;
+.nav-links a:hover,
+.nav-logout:hover {
+    border-bottom-color: var(--leaf);
 }
 
 .hamburger {
     display: none;
     background: none;
     border: none;
-    color: white;
-    font-size: 2rem;
+    color: var(--forest);
+    font-size: 28px;
+    line-height: 1;
+    padding: 4px 8px;
     cursor: pointer;
 }
 
@@ -77,18 +64,14 @@ a {
     .nav-links {
         position: absolute;
         top: 100%;
-        right: 0;
         left: 0;
-
-        width: 100%;
-        background-color: #333;
-
+        right: 0;
         display: none;
         flex-direction: column;
-
-        padding: 1rem;
-        margin: 0;
-
+        gap: 4px;
+        padding: 12px 24px 20px;
+        background: var(--paper);
+        border-bottom: 1px solid var(--line);
         z-index: 1000;
     }
 
@@ -96,9 +79,9 @@ a {
         display: flex;
     }
 
-    .nav-links li {
-        margin: 1rem 0;
-        text-align: center;
+    .nav-links a,
+    .nav-logout {
+        display: inline-block;
+        padding: 10px 0;
     }
-
 }

@@ -9,5 +9,24 @@ const api = axios.create({
     },
 });
 
+api.interceptors.request.use((config) => {
+    const token = sessionStorage.getItem("token");
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+});
+
+// An expired token means the session is over. A failed login is just a wrong password.
+api.interceptors.response.use(undefined, (error) => {
+    if (error.response?.status === 401 && error.config?.url !== "/customers/login") {
+        sessionStorage.clear();
+        window.location.assign("/login");
+    }
+    return Promise.reject(error);
+});
+
+export const errorMessage = (error, fallback) =>
+    typeof error.response?.data === "string" && error.response.data ? error.response.data : fallback;
 
 export default api;

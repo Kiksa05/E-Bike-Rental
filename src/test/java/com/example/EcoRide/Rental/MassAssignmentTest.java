@@ -1,5 +1,6 @@
 package com.example.EcoRide.Rental;
 
+import com.example.EcoRide.Rental.config.SecurityConfig;
 import com.example.EcoRide.Rental.controllers.CustomerController;
 import com.example.EcoRide.Rental.controllers.RentalController;
 import com.example.EcoRide.Rental.dao.CustomerDao;
@@ -14,8 +15,12 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
 import java.util.Optional;
 
@@ -23,13 +28,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /** Requests must not be able to set fields the API does not offer, such as id, role or status. */
 @WebMvcTest({CustomerController.class, RentalController.class})
+@Import(SecurityConfig.class)
+@TestPropertySource(properties = "app.jwt.secret=test-secret-test-secret-test-secret-1234")
 class MassAssignmentTest {
+
+    private static final RequestPostProcessor ADMIN =
+            jwt().jwt(token -> token.subject("1")).authorities(new SimpleGrantedAuthority("ROLE_admin"));
 
     @Autowired
     private MockMvc mvc;
@@ -64,7 +75,7 @@ class MassAssignmentTest {
         when(customerDao.findById(5)).thenReturn(Optional.of(existing));
         when(customerDao.save(any(Customer.class))).thenAnswer(call -> call.getArgument(0));
 
-        send(put("/customers/5"), """
+        send(put("/customers/5").with(jwt().jwt(token -> token.subject("5"))), """
                 {"id":1,"name":"Eve2","email":"eve@demo.local","phone":"2","role":"admin","accountBalance":99999}""")
                 .andExpect(status().isOk());
 
@@ -79,7 +90,7 @@ class MassAssignmentTest {
         when(customerDao.findById(2)).thenReturn(Optional.of(new Customer()));
         when(ebikeDao.findById(3)).thenReturn(Optional.of(new Ebike()));
 
-        send(post("/rentals/pending"), """
+        send(post("/rentals/pending").with(jwt().jwt(token -> token.subject("2"))), """
                 {"id":1,"customer":{"id":2},"ebike":{"id":3},"passportNumber":"X1",
                  "rentalStartTime":"2026-12-01T10:00","rentalEndTime":"2026-12-01T12:00",
                  "rentalStatus":"Approved"}""")
@@ -94,11 +105,12 @@ class MassAssignmentTest {
 
     @Test
     void endpointsThatSavedRawRequestsAreGone() throws Exception {
-        send(post("/customers"), "{\"email\":\"e@demo.local\",\"password\":\"pw\",\"role\":\"admin\"}")
+        // Sent as an admin, so a 405 proves the endpoint is gone rather than just blocked.
+        send(post("/customers").with(ADMIN), "{\"email\":\"e@demo.local\",\"password\":\"pw\",\"role\":\"admin\"}")
                 .andExpect(status().isMethodNotAllowed());
-        send(post("/rentals"), "{\"rentalStatus\":\"Approved\"}")
+        send(post("/rentals").with(ADMIN), "{\"rentalStatus\":\"Approved\"}")
                 .andExpect(status().isMethodNotAllowed());
-        send(put("/rentals"), "{\"rentalStatus\":\"Approved\"}")
+        send(put("/rentals").with(ADMIN), "{\"rentalStatus\":\"Approved\"}")
                 .andExpect(status().isMethodNotAllowed());
     }
 

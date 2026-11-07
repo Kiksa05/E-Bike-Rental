@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import api from "../services/api";
-import { useNavigate } from "react-router-dom";
+import api, { errorMessage } from "../services/api";
+import { Link, useNavigate } from "react-router-dom";
 import './RegisterForm.css';
 import Swal from 'sweetalert2';
 
@@ -16,10 +16,12 @@ const RegistrationForm = () => {
         try {
             await api.post('/customers/register', { name, email, password, phone });
             Swal.fire({
-                title: 'Success!',
-                text: 'Account created successfully',
+                title: 'Account created',
+                text: 'Log in to rent your first bike.',
                 icon: 'success',
-                confirmButtonColor: '#007bff',
+                iconColor: '#1a7346',
+                confirmButtonText: 'Go to log in',
+                confirmButtonColor: '#123d2c',
             }).then(() => {
                 navigate('/login');
             });
@@ -28,12 +30,12 @@ const RegistrationForm = () => {
             console.error('Registration error:', error);
 
             Swal.fire({
-                            title: 'Registration Failed',
-                            text: error.response?.data || 'Something went wrong. Please try again.',
-                            icon: 'error',
-                            confirmButtonColor: '#d33'
-                        });
-            }
+                title: 'Registration failed',
+                text: errorMessage(error, 'The server could not be reached. Try again in a moment.'),
+                icon: 'error',
+                confirmButtonColor: '#123d2c'
+            });
+        }
 
     };
 
@@ -41,63 +43,62 @@ const RegistrationForm = () => {
         <div className="auth-container">
             <div className="auth-card">
 
-                <h2>Create Account</h2>
+                <h1>Create your account</h1>
 
                 <form className="auth-form" onSubmit={handleSubmit}>
 
-                    <div className="form-group">
-                        <label>Name</label>
+                    <label className="form-group">
+                        <span>Name</span>
                         <input
                             type="text"
+                            autoComplete="name"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             required
                         />
-                    </div>
+                    </label>
 
-
-                    <div className="form-group">
-                        <label>Email</label>
+                    <label className="form-group">
+                        <span>Email</span>
                         <input
                             type="email"
+                            autoComplete="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
                         />
-                    </div>
+                    </label>
 
-
-                    <div className="form-group">
-                        <label>Password</label>
+                    <label className="form-group">
+                        <span>Password</span>
                         <input
                             type="password"
+                            autoComplete="new-password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
                         />
-                    </div>
+                    </label>
 
-
-                    <div className="form-group">
-                        <label>Phone</label>
+                    <label className="form-group">
+                        <span>Phone</span>
                         <input
-                            type="text"
+                            type="tel"
+                            autoComplete="tel"
                             value={phone}
                             onChange={(e) => setPhone(e.target.value)}
                             required
                         />
-                    </div>
-
+                    </label>
 
                     <button className="auth-button" type="submit">
-                        Register
+                        Create account
                     </button>
 
                 </form>
 
-
                 <div className="auth-link">
-                    Already have an account? <a href="/login">Login</a>
+                    Already have an account? <Link to="/login">Log in</Link>
                 </div>
 
             </div>
