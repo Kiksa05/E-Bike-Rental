@@ -6,7 +6,6 @@ import com.example.EcoRide.Rental.models.Customer;
 import com.example.EcoRide.Rental.models.Ebike;
 import com.example.EcoRide.Rental.models.Rental;
 import com.example.EcoRide.Rental.dao.RentalDao;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,21 +21,23 @@ import org.springframework.transaction.annotation.Transactional;
 
 @RestController
 @RequestMapping("/rentals")
-@CrossOrigin
 public class RentalController {
 
     private static final Logger logger = LoggerFactory.getLogger(RentalController.class);
 
     private List<Rental> pendingRentals = new ArrayList<>();
 
-    @Autowired
-    private RentalDao rentalDao;
+    private final RentalDao rentalDao;
 
-    @Autowired
-    private CustomerDao customerDao;
+    private final CustomerDao customerDao;
 
-    @Autowired
-    private EbikeDao ebikeDao;
+    private final EbikeDao ebikeDao;
+
+    public RentalController(RentalDao rentalDao, CustomerDao customerDao, EbikeDao ebikeDao) {
+        this.rentalDao = rentalDao;
+        this.customerDao = customerDao;
+        this.ebikeDao = ebikeDao;
+    }
 
     @GetMapping("/{id}")
     public Rental getRentalById(@PathVariable int id) {

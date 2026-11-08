@@ -2,7 +2,6 @@ package com.example.EcoRide.Rental.controllers;
 
 import com.example.EcoRide.Rental.models.Ebike;
 import com.example.EcoRide.Rental.dao.EbikeDao;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,8 +12,11 @@ import java.util.List;
 @RequestMapping("/ebikes")
 public class EbikeController {
 
-    @Autowired
-    private EbikeDao ebikeDao;
+    private final EbikeDao ebikeDao;
+
+    public EbikeController(EbikeDao ebikeDao) {
+        this.ebikeDao = ebikeDao;
+    }
 
     @GetMapping("/{id}")
     public Ebike getEbikeById(@PathVariable int id) {

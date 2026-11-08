@@ -4,7 +4,6 @@ import com.example.EcoRide.Rental.models.Customer;
 import com.example.EcoRide.Rental.dao.CustomerDao;
 import com.example.EcoRide.Rental.service.Email;
 import jakarta.mail.MessagingException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -26,21 +25,23 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/customers")
-@CrossOrigin
 public class CustomerController {
 
     private static final Duration TOKEN_LIFETIME = Duration.ofHours(2);
 
-    @Autowired
-    private CustomerDao customerDao;
+    private final CustomerDao customerDao;
 
-    @Autowired
-    private Email emailService;
+    private final Email emailService;
 
-    @Autowired
-    private JwtEncoder jwtEncoder;
+    private final JwtEncoder jwtEncoder;
 
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
+    public CustomerController(CustomerDao customerDao, Email emailService, JwtEncoder jwtEncoder) {
+        this.customerDao = customerDao;
+        this.emailService = emailService;
+        this.jwtEncoder = jwtEncoder;
+    }
 
     @GetMapping("/{id}")
     public Customer getCustomerById(@PathVariable int id) {

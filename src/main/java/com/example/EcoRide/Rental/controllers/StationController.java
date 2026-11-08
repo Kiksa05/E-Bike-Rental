@@ -2,7 +2,6 @@ package com.example.EcoRide.Rental.controllers;
 
 import com.example.EcoRide.Rental.models.Station;
 import com.example.EcoRide.Rental.dao.StationDao;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,11 +10,13 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/stations")
-@CrossOrigin
 public class StationController {
 
-    @Autowired
-    private StationDao stationDao;
+    private final StationDao stationDao;
+
+    public StationController(StationDao stationDao) {
+        this.stationDao = stationDao;
+    }
 
     @GetMapping("/{id}")
     public Station getStationById(@PathVariable int id) {

@@ -2,7 +2,6 @@ package com.example.EcoRide.Rental.controllers;
 
 import com.example.EcoRide.Rental.models.Payment;
 import com.example.EcoRide.Rental.dao.PaymentDao;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,11 +10,13 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/payments")
-@CrossOrigin
 public class PaymentController {
 
-    @Autowired
-    private PaymentDao paymentDao;
+    private final PaymentDao paymentDao;
+
+    public PaymentController(PaymentDao paymentDao) {
+        this.paymentDao = paymentDao;
+    }
 
     @GetMapping("/{id}")
     public Payment getPaymentById(@PathVariable int id) {

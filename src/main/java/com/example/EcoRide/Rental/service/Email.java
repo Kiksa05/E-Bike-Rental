@@ -2,7 +2,6 @@ package com.example.EcoRide.Rental.service;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamSource;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -20,11 +19,14 @@ public class Email {
 
     private static final Logger logger = LoggerFactory.getLogger(Email.class);
 
-    @Autowired
-    private JavaMailSender mailSender;
+    private final JavaMailSender mailSender;
 
-    @Autowired
-    private PDFGenerator pdfGeneratorService;
+    private final PDFGenerator pdfGeneratorService;
+
+    public Email(JavaMailSender mailSender, PDFGenerator pdfGeneratorService) {
+        this.mailSender = mailSender;
+        this.pdfGeneratorService = pdfGeneratorService;
+    }
 
     public void sendRegistrationEmail(String to, String name) throws MessagingException, IOException {
         logger.info("Preparing registration email for {}", to);

@@ -47,7 +47,7 @@ public class SecurityConfig {
 
         return http
                 // Tokens are sent by hand in a header, not automatically like cookies, so CSRF does not apply.
-                .csrf(AbstractHttpConfigurer::disable)
+                .csrf(AbstractHttpConfigurer::disable) // NOSONAR stateless JWT in Authorization header, no cookies
                 .cors(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
