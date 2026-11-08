@@ -8,7 +8,7 @@ EcoRide Rental System is a full-stack web application that allows customers to b
 - Register a new account (passwords hashed with BCrypt, unique email enforced)
 - Log in securely (JWT tokens, valid for 2 hours)
 - Browse available e-bikes
-- Reserve an e-bike on an hourly calendar: pick a day in the next two weeks and see which hours are free, taken or past, then click a start and an end hour. The passport number is pre-filled from your profile
+- Reserve an e-bike on an hourly calendar: pick a day in the next two weeks and see which hours are free, taken or past, then click the hours you want (or a first and a last hour to fill in the ones between). The passport number is pre-filled from your profile
 - **My reservations:** see all your reservations with their price and status (Pending, Approved, Rejected)
 - **Profile:** edit your name, email, phone and passport number
 - Change your password (requires the current password, at least 8 characters)
@@ -206,7 +206,7 @@ http://localhost:3000
 
 1. Register a customer account and log in.
 2. Optionally add your passport number on the **Profile** page.
-3. Browse available e-bikes, pick one, then click a free start hour and an end hour on the calendar. Hours already booked by someone else show as taken.
+3. Browse available e-bikes, pick one, then click the free hours you want on the calendar. Hours already booked by someone else show as taken.
 4. The reservation is submitted with a **Pending** status. If the bike is already booked for that time, you are asked to pick another time or bike.
 5. An administrator approves or rejects it on the **To review** page.
 6. Follow the status on **My reservations**. Once approved, the bike is yours for that time, and others can still book it for other times.

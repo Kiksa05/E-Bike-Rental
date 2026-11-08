@@ -50,23 +50,38 @@ test('a booking with minutes blocks every hour it touches', () => {
     expect(isFree(at(16), at(17), odd)).toBe(true);
 });
 
-test('first click picks one hour, second click sets the end, third starts over', () => {
-    const first = pickHour(null, at(9), booked);
-    expect(first).toEqual({ start: at(9), end: at(10), complete: false });
+const pickAll = (hours, bookings = booked) => hours.reduce((sel, slot) => pickHour(sel, slot, bookings), null);
 
-    const second = pickHour(first, at(11), booked);
-    expect(second).toEqual({ start: at(9), end: at(12), complete: true });
+test('the first click picks one hour', () => {
+    expect(pickAll([at(9)])).toEqual({ start: at(9), end: at(10) });
+});
 
-    expect(pickHour(second, at(16), booked)).toEqual({ start: at(16), end: at(17), complete: false });
+test('clicking hours one by one keeps adding them', () => {
+    expect(pickAll([at(9), at(10), at(11), at(12)])).toEqual({ start: at(9), end: at(13) });
+});
+
+test('clicking a later hour fills in the hours between', () => {
+    expect(pickAll([at(9), at(12)])).toEqual({ start: at(9), end: at(13) });
+});
+
+test('clicking an earlier hour extends the selection backwards', () => {
+    expect(pickAll([at(11), at(9)])).toEqual({ start: at(9), end: at(12) });
 });
 
 test('the end can be on a later day', () => {
-    const first = pickHour(null, at(20), booked);
-    expect(pickHour(first, at(8, 2), booked)).toEqual({ start: at(20), end: at(9, 2), complete: true });
+    expect(pickAll([at(20), at(8, 2)])).toEqual({ start: at(20), end: at(9, 2) });
 });
 
-test('an end before the start, or across a booking, starts over instead', () => {
-    const first = pickHour(null, at(11), booked);
-    expect(pickHour(first, at(10), booked)).toEqual({ start: at(10), end: at(11), complete: false });
-    expect(pickHour(first, at(16), booked)).toEqual({ start: at(16), end: at(17), complete: false });
+test('clicking inside a longer selection shortens it to end there', () => {
+    expect(pickAll([at(8), at(11), at(9)])).toEqual({ start: at(8), end: at(10) });
+});
+
+test('clicking the only selected hour again clears it', () => {
+    expect(pickAll([at(9), at(9)])).toBeNull();
+});
+
+test('a range across a taken hour starts a new selection instead', () => {
+    // 13:00-15:00 is taken
+    expect(pickAll([at(11), at(16)])).toEqual({ start: at(16), end: at(17) });
+    expect(pickAll([at(16), at(11)])).toEqual({ start: at(11), end: at(12) });
 });

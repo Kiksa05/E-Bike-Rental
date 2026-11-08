@@ -26,11 +26,19 @@ export const upcomingDays = (from, count) =>
 // Two ranges overlap when each starts before the other ends, so back-to-back bookings are free.
 export const isFree = (start, end, bookings) => bookings.every((b) => b.end <= start || b.start >= end);
 
-// First click picks a start hour, the next click on a later free hour sets the end, the click after that starts over.
+// Each click joins the hour to the selection (before or after it), filling the hours between.
+// Clicking inside a longer selection ends it there; clicking the only selected hour clears it.
+// If a taken hour is in the way, the click starts a new selection instead.
 export const pickHour = (selection, slot, bookings) => {
     const slotEnd = nextHour(slot);
-    if (selection && !selection.complete && slot >= selection.start && isFree(selection.start, slotEnd, bookings)) {
-        return { start: selection.start, end: slotEnd, complete: true };
+    if (!selection) {
+        return { start: slot, end: slotEnd };
     }
-    return { start: slot, end: slotEnd, complete: false };
+    const single = selection.end - selection.start === HOUR_MS;
+    if (single && slot.getTime() === selection.start.getTime()) {
+        return null;
+    }
+    const start = slot < selection.start ? slot : selection.start;
+    const end = slot < selection.start ? selection.end : slotEnd;
+    return isFree(start, end, bookings) ? { start, end } : { start: slot, end: slotEnd };
 };

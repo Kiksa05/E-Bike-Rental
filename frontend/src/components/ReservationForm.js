@@ -112,7 +112,7 @@ const ReservationForm = () => {
 
                     <fieldset className="form-group calendar-fieldset">
                         <legend><span>When</span></legend>
-                        <p className="reserve-as">Click a start hour, then an end hour. Whole hours only.</p>
+                        <p className="reserve-as">Click every hour you want, or a first and a last hour to fill in the ones between.</p>
                         <HourCalendar
                             bookings={bookings}
                             selection={selection}
@@ -120,11 +120,16 @@ const ReservationForm = () => {
                             onPick={(slot) => setSelection(pickHour(selection, slot, bookings))} />
                     </fieldset>
 
-                    <p className="calendar-selection" aria-live="polite">
-                        {selection
-                            ? `${selection.start.toLocaleString(undefined, timeFormat)} – ${selection.end.toLocaleString(undefined, timeFormat)} (${hours} ${hours === 1 ? 'hour' : 'hours'})`
-                            : 'No time picked yet'}
-                    </p>
+                    <div className="calendar-selection">
+                        <p aria-live="polite">
+                            {selection
+                                ? `${selection.start.toLocaleString(undefined, timeFormat)} – ${selection.end.toLocaleString(undefined, timeFormat)} (${hours} ${hours === 1 ? 'hour' : 'hours'})`
+                                : 'No time picked yet'}
+                        </p>
+                        {selection && (
+                            <button type="button" className="calendar-clear" onClick={() => setSelection(null)}>Clear</button>
+                        )}
+                    </div>
 
                     <button className="auth-button" type="submit" disabled={!selection}>
                         Send reservation
