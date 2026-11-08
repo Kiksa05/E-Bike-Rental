@@ -14,6 +14,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,6 +79,13 @@ public class RentalController {
                 || !request.rentalEndTime().isAfter(request.rentalStartTime())) {
             return new ResponseEntity<>("End time must be after the start time", HttpStatus.BAD_REQUEST);
         }
+        if (!onTheHour(request.rentalStartTime()) || !onTheHour(request.rentalEndTime())) {
+            return new ResponseEntity<>("Reservations start and end on the hour, like 13:00", HttpStatus.BAD_REQUEST);
+        }
+        // The current hour is still bookable, so you can pick a bike up right away.
+        if (request.rentalStartTime().isBefore(LocalDateTime.now().truncatedTo(ChronoUnit.HOURS))) {
+            return new ResponseEntity<>("The start time is in the past", HttpStatus.BAD_REQUEST);
+        }
 
         // The customer comes from the signed token, so nobody can reserve as someone else.
         Customer customer = customerDao.findById(Integer.parseInt(authentication.getName())).orElse(null);
@@ -107,6 +115,10 @@ public class RentalController {
         rental.setRentalStatus("Pending");
         rentalDao.save(rental);
         return new ResponseEntity<>("Reservation created successfully and is pending approval.", HttpStatus.CREATED);
+    }
+
+    private static boolean onTheHour(LocalDateTime time) {
+        return time.equals(time.truncatedTo(ChronoUnit.HOURS));
     }
 
     @GetMapping("/pending")

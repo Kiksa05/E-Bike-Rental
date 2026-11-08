@@ -21,6 +21,10 @@ public interface RentalDao extends JpaRepository<Rental, Integer> {
 
     List<Rental> findByCustomerIdOrderByRentalStartTimeDesc(int customerId);
 
+    @Query("SELECT r FROM Rental r WHERE r.ebike.id = :ebikeId AND r.rentalStatus IN ('Pending', 'Approved')"
+            + " AND r.rentalEndTime > :now ORDER BY r.rentalStartTime")
+    List<Rental> findUpcomingBookings(@Param("ebikeId") int ebikeId, @Param("now") LocalDateTime now);
+
     // Two time ranges overlap when each starts before the other ends; back-to-back bookings (10-12, 12-14) are fine.
     @Query("SELECT COUNT(r) > 0 FROM Rental r WHERE r.ebike.id = :ebikeId AND r.id <> :excludeId"
             + " AND r.rentalStatus IN ('Pending', 'Approved')"

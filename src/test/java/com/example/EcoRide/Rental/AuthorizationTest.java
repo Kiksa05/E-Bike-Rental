@@ -57,7 +57,7 @@ class AuthorizationTest {
 
     private static final String RESERVATION = """
             {"customer":{"id":1},"ebike":{"id":3},"passportNumber":"X1",
-             "rentalStartTime":"2026-12-01T10:00","rentalEndTime":"2026-12-01T12:00"}""";
+             "rentalStartTime":"2099-12-01T10:00","rentalEndTime":"2099-12-01T12:00"}""";
 
     @Autowired
     private MockMvc mvc;
@@ -239,7 +239,7 @@ class AuthorizationTest {
     void reservationMustEndAfterItStarts() throws Exception {
         String backwards = """
                 {"ebike":{"id":3},"passportNumber":"X1",
-                 "rentalStartTime":"2026-12-01T12:00","rentalEndTime":"2026-12-01T10:00"}""";
+                 "rentalStartTime":"2099-12-01T12:00","rentalEndTime":"2099-12-01T10:00"}""";
 
         mvc.perform(as(json(post("/rentals/pending"), backwards), token("2", "user"))).andExpect(status().isBadRequest());
 

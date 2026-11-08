@@ -92,7 +92,7 @@ class MassAssignmentTest {
 
         send(post("/rentals/pending").with(jwt().jwt(token -> token.subject("2"))), """
                 {"id":1,"customer":{"id":2},"ebike":{"id":3},"passportNumber":"X1",
-                 "rentalStartTime":"2026-12-01T10:00","rentalEndTime":"2026-12-01T12:00",
+                 "rentalStartTime":"2099-12-01T10:00","rentalEndTime":"2099-12-01T12:00",
                  "rentalStatus":"Approved"}""")
                 .andExpect(status().isCreated());
 

@@ -28,7 +28,9 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -49,11 +51,11 @@ class ReservationRulesTest {
     private static final RequestPostProcessor ADMIN =
             jwt().jwt(token -> token.subject("1")).authorities(new SimpleGrantedAuthority("ROLE_admin"));
     private static final RequestPostProcessor USER_2 = jwt().jwt(token -> token.subject("2"));
-    private static final LocalDateTime START = LocalDateTime.parse("2026-12-01T10:00");
-    private static final LocalDateTime END = LocalDateTime.parse("2026-12-01T12:00");
+    private static final LocalDateTime START = LocalDateTime.parse("2099-12-01T10:00");
+    private static final LocalDateTime END = LocalDateTime.parse("2099-12-01T12:00");
     private static final String RESERVATION = """
             {"ebike":{"id":3},"passportNumber":"X1",
-             "rentalStartTime":"2026-12-01T10:00","rentalEndTime":"2026-12-01T12:00"}""";
+             "rentalStartTime":"2099-12-01T10:00","rentalEndTime":"2099-12-01T12:00"}""";
 
     @Autowired
     private MockMvc mvc;
@@ -128,6 +130,52 @@ class ReservationRulesTest {
         assertEquals("Pending", rental.getRentalStatus());
         assertEquals("Available", bike.getStatus());
         verify(rentalDao, never()).save(any());
+    }
+
+    @Test
+    void reservationsMustStartAndEndOnTheHour() throws Exception {
+        for (String times : List.of(
+                "\"rentalStartTime\":\"2099-12-01T13:47\",\"rentalEndTime\":\"2099-12-01T15:00\"",
+                "\"rentalStartTime\":\"2099-12-01T13:00\",\"rentalEndTime\":\"2099-12-01T15:47\"",
+                "\"rentalStartTime\":\"2099-12-01T13:00:30\",\"rentalEndTime\":\"2099-12-01T15:00\"")) {
+            mvc.perform(post("/rentals/pending").with(USER_2).contentType(MediaType.APPLICATION_JSON)
+                            .content("{\"ebike\":{\"id\":3},\"passportNumber\":\"X1\"," + times + "}"))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(content().string("Reservations start and end on the hour, like 13:00"));
+        }
+        verify(rentalDao, never()).save(any());
+    }
+
+    @Test
+    void reservationsCannotStartInThePast() throws Exception {
+        mvc.perform(post("/rentals/pending").with(USER_2).contentType(MediaType.APPLICATION_JSON).content("""
+                        {"ebike":{"id":3},"passportNumber":"X1",
+                         "rentalStartTime":"2020-01-01T10:00","rentalEndTime":"2020-01-01T12:00"}"""))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("The start time is in the past"));
+
+        verify(rentalDao, never()).save(any());
+    }
+
+    // Calendar
+
+    @Test
+    void anyoneCanSeeWhenABikeIsBookedButNotWho() throws Exception {
+        Rental booked = new Rental();
+        booked.setCustomer(new Customer(2, "Secret Name", "secret@demo.local", "1", 0, "hash", "user"));
+        booked.setPassportNumber("SECRET-PASSPORT");
+        booked.setRentalStatus("Approved");
+        booked.setRentalStartTime(START);
+        booked.setRentalEndTime(END);
+        when(rentalDao.findUpcomingBookings(eq(3), any(LocalDateTime.class))).thenReturn(List.of(booked));
+
+        String body = mvc.perform(get("/ebikes/3/booked"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].start").value("2099-12-01T10:00:00"))
+                .andExpect(jsonPath("$[0].end").value("2099-12-01T12:00:00"))
+                .andReturn().getResponse().getContentAsString();
+
+        assertFalse(body.toLowerCase().contains("secret"), body);
     }
 
     // History

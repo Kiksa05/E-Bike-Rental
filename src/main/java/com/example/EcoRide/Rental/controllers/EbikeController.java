@@ -2,10 +2,12 @@ package com.example.EcoRide.Rental.controllers;
 
 import com.example.EcoRide.Rental.models.Ebike;
 import com.example.EcoRide.Rental.dao.EbikeDao;
+import com.example.EcoRide.Rental.dao.RentalDao;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -14,13 +16,26 @@ public class EbikeController {
 
     private final EbikeDao ebikeDao;
 
-    public EbikeController(EbikeDao ebikeDao) {
+    private final RentalDao rentalDao;
+
+    public EbikeController(EbikeDao ebikeDao, RentalDao rentalDao) {
         this.ebikeDao = ebikeDao;
+        this.rentalDao = rentalDao;
     }
 
     @GetMapping("/{id}")
     public Ebike getEbikeById(@PathVariable int id) {
         return ebikeDao.findById(id).orElse(null);
+    }
+
+    // Only the times, never who booked them: anyone can open this to see when a bike is free.
+    public record BookedSlot(LocalDateTime start, LocalDateTime end) {}
+
+    @GetMapping("/{id}/booked")
+    public List<BookedSlot> getBookedSlots(@PathVariable int id) {
+        return rentalDao.findUpcomingBookings(id, LocalDateTime.now()).stream()
+                .map(rental -> new BookedSlot(rental.getRentalStartTime(), rental.getRentalEndTime()))
+                .toList();
     }
 
     @GetMapping

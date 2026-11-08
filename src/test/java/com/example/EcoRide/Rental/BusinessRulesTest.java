@@ -122,7 +122,7 @@ class BusinessRulesTest {
 
     @Test
     void reservationNeedsABikeAndPassport() throws Exception {
-        String times = "\"rentalStartTime\":\"2026-12-01T10:00\",\"rentalEndTime\":\"2026-12-01T12:00\"";
+        String times = "\"rentalStartTime\":\"2099-12-01T10:00\",\"rentalEndTime\":\"2099-12-01T12:00\"";
 
         send(post("/rentals/pending").with(USER_2), "{\"passportNumber\":\"X1\"," + times + "}")
                 .andExpect(status().isBadRequest())
@@ -139,7 +139,7 @@ class BusinessRulesTest {
     @Test
     void reservationNeedsBothTimes() throws Exception {
         send(post("/rentals/pending").with(USER_2),
-                "{\"ebike\":{\"id\":3},\"passportNumber\":\"X1\",\"rentalStartTime\":\"2026-12-01T10:00\"}")
+                "{\"ebike\":{\"id\":3},\"passportNumber\":\"X1\",\"rentalStartTime\":\"2099-12-01T10:00\"}")
                 .andExpect(status().isBadRequest());
 
         verify(rentalDao, never()).save(any());
@@ -151,7 +151,7 @@ class BusinessRulesTest {
 
         send(post("/rentals/pending").with(USER_2), """
                 {"ebike":{"id":99},"passportNumber":"X1",
-                 "rentalStartTime":"2026-12-01T10:00","rentalEndTime":"2026-12-01T12:00"}""")
+                 "rentalStartTime":"2099-12-01T10:00","rentalEndTime":"2099-12-01T12:00"}""")
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string("Ebike not found"));
 
