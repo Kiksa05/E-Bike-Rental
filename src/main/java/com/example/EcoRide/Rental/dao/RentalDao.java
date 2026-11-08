@@ -16,4 +16,6 @@ public interface RentalDao extends JpaRepository<Rental, Integer> {
 
     @Query("SELECT r FROM Rental r WHERE r.rentalStatus = :status")
     List<Rental> findByRentalStatus(@Param("status") String status);
+
+    List<Rental> findByCustomerId(int customerId);
 }

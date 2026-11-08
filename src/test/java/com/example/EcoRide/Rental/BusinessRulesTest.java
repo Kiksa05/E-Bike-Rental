@@ -225,15 +225,16 @@ class BusinessRulesTest {
     }
 
     @Test
-    void updateHashesANewPassword() throws Exception {
+    void profileUpdateCannotChangeThePassword() throws Exception {
         Customer existing = customerWithId2();
         when(customerDao.findById(2)).thenReturn(Optional.of(existing));
         when(customerDao.save(any(Customer.class))).thenAnswer(call -> call.getArgument(0));
 
+        // Passwords change only through /password, which asks for the current one.
         send(put("/customers/2").with(USER_2), "{\"name\":\"U\",\"email\":\"u@demo.local\",\"phone\":\"1\",\"password\":\"new-pass\"}")
                 .andExpect(status().isOk());
 
-        assertTrue(new BCryptPasswordEncoder().matches("new-pass", existing.getPassword()));
+        assertEquals("old-hash", existing.getPassword());
     }
 
     @Test

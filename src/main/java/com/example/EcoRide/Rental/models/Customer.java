@@ -21,6 +21,12 @@ public class Customer {
     private String password;
     private String role;
 
+    private String passportNumber;
+
+    // Accounts are disabled, never deleted: customer data must be kept for at least two years.
+    @Column(nullable = false, columnDefinition = "boolean default false")
+    private boolean disabled;
+
     public Customer(){}
     public Customer(String name, String phone){
         this.name = name;
@@ -67,6 +73,12 @@ public class Customer {
 
     public double getAccountBalance() { return accountBalance; }
     public void setAccountBalance(double accountBalance) { this.accountBalance = accountBalance; }
+
+    public String getPassportNumber() { return passportNumber; }
+    public void setPassportNumber(String passportNumber) { this.passportNumber = passportNumber; }
+
+    public boolean isDisabled() { return disabled; }
+    public void setDisabled(boolean disabled) { this.disabled = disabled; }
 
     public boolean sameMail(Customer c) {
         if ( c == null || this.getEmail() == null ||  c.getEmail() == null) {

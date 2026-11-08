@@ -56,6 +56,14 @@ const Navbar = () => {
                                 <Link to="/admin" onClick={closeMenu}>Reservations</Link>
                             </li>
                         )}
+                        {isAdmin && (
+                            <li>
+                                <Link to="/admin/users" onClick={closeMenu}>Users</Link>
+                            </li>
+                        )}
+                        <li>
+                            <Link to="/profile" onClick={closeMenu}>Profile</Link>
+                        </li>
                         <li>
                             <button className="nav-logout" onClick={handleLogout}>Log out</button>
                         </li>

@@ -11,6 +11,7 @@ import com.example.EcoRide.Rental.models.Ebike;
 import com.example.EcoRide.Rental.models.Rental;
 import com.example.EcoRide.Rental.service.Email;
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,6 +76,34 @@ class AuthorizationTest {
     private StationDao stationDao;
     @MockBean
     private Email email;
+
+    // Every token is checked against the account it belongs to, so the test users must exist.
+    @BeforeEach
+    void knownAccounts() {
+        when(customerDao.findById(1)).thenReturn(Optional.of(new Customer(1, "A", "kiksa@admin.com", "1", 0, "hash", "admin")));
+        when(customerDao.findById(2)).thenReturn(Optional.of(new Customer(2, "U", "u@demo.local", "1", 0, "hash", "user")));
+    }
+
+    @Test
+    void tokenStopsWorkingOnceTheAccountIsDisabled() throws Exception {
+        Customer disabled = new Customer(2, "U", "u@demo.local", "1", 0, "hash", "user");
+        disabled.setDisabled(true);
+        when(customerDao.findById(2)).thenReturn(Optional.of(disabled));
+
+        mvc.perform(as(get("/customers/2"), token("2", "user"))).andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void demotedAdminLosesAdminRightsImmediately() throws Exception {
+        when(customerDao.findById(1)).thenReturn(Optional.of(new Customer(1, "A", "kiksa@admin.com", "1", 0, "hash", "user")));
+
+        mvc.perform(as(get("/customers"), token("1", "admin"))).andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void tokenForADeletedAccountIsRejected() throws Exception {
+        mvc.perform(as(get("/ebikes/1"), token("77", "user"))).andExpect(status().isUnauthorized());
+    }
 
     @Test
     void anyoneCanBrowseBikesAndStations() throws Exception {
