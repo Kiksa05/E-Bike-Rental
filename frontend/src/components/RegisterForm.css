@@ -31,6 +31,17 @@
     flex-direction: column;
 }
 
+.auth-form + .auth-form {
+    margin-top: 36px;
+    padding-top: 28px;
+    border-top: 1px solid var(--line);
+}
+
+.auth-form h2 {
+    font-size: 24px;
+    margin-bottom: 18px;
+}
+
 .form-group {
     display: flex;
     flex-direction: column;

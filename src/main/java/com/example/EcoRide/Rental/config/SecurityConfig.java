@@ -1,5 +1,7 @@
 package com.example.EcoRide.Rental.config;
 
+import com.example.EcoRide.Rental.dao.CustomerDao;
+import com.example.EcoRide.Rental.models.Customer;
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
 import jakarta.servlet.DispatcherType;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,7 +12,11 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
+import org.springframework.security.oauth2.core.OAuth2Error;
+import org.springframework.security.oauth2.core.OAuth2TokenValidatorResult;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
+import org.springframework.security.oauth2.jwt.JwtValidators;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
@@ -23,6 +29,8 @@ import org.springframework.security.web.access.expression.WebExpressionAuthoriza
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
+import java.util.Optional;
 
 @Configuration
 public class SecurityConfig {
@@ -57,7 +65,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/ebikes", "/ebikes/**", "/stations", "/stations/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/rentals/pending").authenticated()
                         .requestMatchers(HttpMethod.GET, "/customers/{id}").access(ownerOrAdmin)
-                        .requestMatchers(HttpMethod.PUT, "/customers/{id}").access(ownerOrAdmin)
+                        .requestMatchers(HttpMethod.PUT, "/customers/{id}", "/customers/{id}/password").access(ownerOrAdmin)
                         .anyRequest().hasRole(ADMIN))
                 .oauth2ResourceServer(server -> server.jwt(jwt -> jwt.jwtAuthenticationConverter(roleConverter())))
                 .build();
@@ -69,8 +77,25 @@ public class SecurityConfig {
     }
 
     @Bean
-    public JwtDecoder jwtDecoder() {
-        return NimbusJwtDecoder.withSecretKey(key).macAlgorithm(MacAlgorithm.HS256).build();
+    public JwtDecoder jwtDecoder(CustomerDao customerDao) {
+        NimbusJwtDecoder decoder = NimbusJwtDecoder.withSecretKey(key).macAlgorithm(MacAlgorithm.HS256).build();
+        decoder.setJwtValidator(new DelegatingOAuth2TokenValidator<>(JwtValidators.createDefault(), jwt -> {
+            // Checked on every request, so disabling an account or changing a role takes effect at once.
+            Customer customer = parseId(jwt.getSubject()).flatMap(customerDao::findById).orElse(null);
+            boolean valid = customer != null && !customer.isDisabled()
+                    && Objects.equals(customer.getRole(), jwt.getClaimAsString("role"));
+            return valid ? OAuth2TokenValidatorResult.success()
+                    : OAuth2TokenValidatorResult.failure(new OAuth2Error("invalid_token", "Account is disabled or has changed", null));
+        }));
+        return decoder;
+    }
+
+    private static Optional<Integer> parseId(String subject) {
+        try {
+            return Optional.of(Integer.parseInt(subject));
+        } catch (NumberFormatException e) {
+            return Optional.empty();
+        }
     }
 
     private JwtAuthenticationConverter roleConverter() {

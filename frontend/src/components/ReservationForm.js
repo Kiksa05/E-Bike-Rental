@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import api, { errorMessage } from '../services/api';
 import { rentalPrice, toLocalInput, nextHour } from '../services/rental';
 import { getImage } from './BikeOffer';
@@ -14,6 +14,17 @@ const ReservationForm = () => {
     const [passportNumber, setPassportNumber] = useState('');
     const [startTime, setStartTime] = useState(() => toLocalInput(new Date()));
     const [endTime, setEndTime] = useState(() => toLocalInput(nextHour(new Date())));
+
+    // Pre-fill from the profile; the field stays editable for this one reservation.
+    useEffect(() => {
+        const userId = sessionStorage.getItem('userId');
+        if (!userId) {
+            return;
+        }
+        api.get(`/customers/${userId}`)
+            .then((response) => setPassportNumber((typed) => typed || response.data.passportNumber || ''))
+            .catch(() => {});
+    }, []);
 
     if (!sessionStorage.getItem('token')) {
         return <Navigate to="/login" replace state={{ message: 'Log in to rent a bike.' }} />;

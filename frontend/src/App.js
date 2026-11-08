@@ -7,6 +7,8 @@ import Footer from './components/Footer';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import AdminDashboard from './components/AdminDashboard';
+import ProfileForm from './components/ProfileForm';
+import UserManagement from './components/UserManagement';
 
 function App() {
   return (
@@ -20,6 +22,9 @@ function App() {
             <Route path="/login" element={<LoginForm />} />
             <Route path="/reserve/:id" element={<ReservationForm />} />
             <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/users" element={<UserManagement />} />
+            <Route path="/admin/users/:id" element={<ProfileForm />} />
+            <Route path="/profile" element={<ProfileForm />} />
           </Routes>
         </main>
       </Router>

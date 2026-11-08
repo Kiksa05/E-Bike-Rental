@@ -43,6 +43,19 @@
     font-size: 15px;
 }
 
+.admin-table select {
+    padding: 8px 10px;
+    background: #fff;
+    border: 1px solid var(--muted);
+    border-radius: 8px;
+    color: var(--ink);
+    font: inherit;
+}
+
+.admin-table select:disabled {
+    background: var(--line);
+}
+
 .auth-button.secondary {
     background: transparent;
     color: var(--forest);
