@@ -18,4 +18,23 @@ public interface RentalDao extends JpaRepository<Rental, Integer> {
     List<Rental> findByRentalStatus(@Param("status") String status);
 
     List<Rental> findByCustomerId(int customerId);
+
+    List<Rental> findByCustomerIdOrderByRentalStartTimeDesc(int customerId);
+
+    @Query("SELECT r FROM Rental r WHERE r.ebike.id = :ebikeId AND r.rentalStatus IN ('Pending', 'Approved')"
+            + " AND r.rentalEndTime > :now ORDER BY r.rentalStartTime")
+    List<Rental> findUpcomingBookings(@Param("ebikeId") int ebikeId, @Param("now") LocalDateTime now);
+
+    // Two time ranges overlap when each starts before the other ends; back-to-back bookings (10-12, 12-14) are fine.
+    @Query("SELECT COUNT(r) > 0 FROM Rental r WHERE r.ebike.id = :ebikeId AND r.id <> :excludeId"
+            + " AND r.rentalStatus IN ('Pending', 'Approved')"
+            + " AND r.rentalStartTime < :end AND r.rentalEndTime > :start")
+    boolean existsOverlap(@Param("ebikeId") int ebikeId, @Param("start") LocalDateTime start,
+                          @Param("end") LocalDateTime end, @Param("excludeId") int excludeId);
+
+    @Query("SELECT COUNT(r) > 0 FROM Rental r WHERE r.ebike.id = :ebikeId AND r.id <> :excludeId"
+            + " AND r.rentalStatus = 'Approved'"
+            + " AND r.rentalStartTime < :end AND r.rentalEndTime > :start")
+    boolean existsApprovedOverlap(@Param("ebikeId") int ebikeId, @Param("start") LocalDateTime start,
+                                  @Param("end") LocalDateTime end, @Param("excludeId") int excludeId);
 }

@@ -1,0 +1,199 @@
+.calendar {
+    margin-bottom: 18px;
+}
+
+.calendar-days {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 6px;
+}
+
+.calendar-day {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 2px;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    color: var(--ink);
+    font: inherit;
+    cursor: pointer;
+}
+
+.calendar-day span {
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.calendar-day strong {
+    font-size: 18px;
+}
+
+.calendar-day:hover {
+    border-color: var(--leaf);
+}
+
+.calendar-day.active {
+    background: var(--forest);
+    border-color: var(--forest);
+    color: #fff;
+}
+
+.calendar-day.active span {
+    color: var(--mint);
+}
+
+.calendar-heading {
+    margin: 18px 0 10px;
+    font-weight: 600;
+}
+
+.calendar-hours {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 6px;
+}
+
+.calendar-hour {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    padding: 6px 2px;
+    border-radius: 10px;
+    font: inherit;
+    font-size: 15px;
+    font-variant-numeric: tabular-nums;
+    cursor: pointer;
+}
+
+.calendar-hour small {
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.calendar-hour.free,
+.calendar-legend .free {
+    background: #fff;
+    border: 1px solid var(--muted);
+    color: var(--ink);
+}
+
+.calendar-hour.free:hover {
+    background: var(--mint);
+    border-color: var(--leaf);
+}
+
+.calendar-hour.chosen,
+.calendar-legend .chosen {
+    background: var(--forest);
+    border: 1px solid var(--forest);
+    color: #fff;
+}
+
+/* Stripes as well as color, so taken hours stand out without relying on color alone. */
+.calendar-hour.taken,
+.calendar-legend .taken {
+    background: repeating-linear-gradient(135deg, #f1e3e1 0 6px, #fff 6px 12px);
+    border: 1px solid var(--error);
+    color: var(--error);
+    cursor: not-allowed;
+}
+
+.calendar-hour.past {
+    background: transparent;
+    border: 1px dashed var(--line);
+    color: var(--muted);
+    cursor: not-allowed;
+}
+
+.calendar-hour:focus-visible,
+.calendar-day:focus-visible {
+    outline: 3px solid var(--leaf);
+    outline-offset: 2px;
+}
+
+.calendar-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin: 12px 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: 14px;
+    color: var(--muted);
+}
+
+.calendar-legend li {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.calendar-legend i {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+}
+
+.calendar-selection {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 0 0 16px;
+    padding: 12px 16px;
+    background: var(--mint);
+    border-radius: 12px;
+    color: var(--forest);
+    font-weight: 600;
+}
+
+.calendar-selection p {
+    margin: 0;
+}
+
+.calendar-clear {
+    flex-shrink: 0;
+    padding: 6px 14px;
+    background: transparent;
+    border: 1.5px solid var(--forest);
+    border-radius: 999px;
+    color: var(--forest);
+    font: inherit;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.calendar-clear:hover {
+    background: #fff;
+}
+
+@media (max-width: 480px) {
+    .calendar-hours {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .calendar-days {
+        gap: 4px;
+    }
+}
+
+.calendar-fieldset {
+    margin: 0 0 18px;
+    padding: 0;
+    border: 0;
+    min-width: 0;
+}
+
+.calendar-fieldset legend {
+    padding: 0;
+    font-weight: 600;
+}
+
+.calendar-fieldset .reserve-as {
+    margin: 4px 0 12px;
+}

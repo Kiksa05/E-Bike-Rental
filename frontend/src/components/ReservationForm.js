@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import api, { errorMessage } from '../services/api';
-import { rentalPrice, toLocalInput, nextHour } from '../services/rental';
+import { rentalPrice, toLocalInput, pickHour } from '../services/rental';
 import { getImage } from './BikeOffer';
+import HourCalendar from './HourCalendar';
 import { Navigate, useNavigate, useLocation } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import './RegisterForm.css';
@@ -12,8 +13,20 @@ const ReservationForm = () => {
     const { ebikeId, ebikeName, pricePerDay } = location.state || {};
 
     const [passportNumber, setPassportNumber] = useState('');
-    const [startTime, setStartTime] = useState(() => toLocalInput(new Date()));
-    const [endTime, setEndTime] = useState(() => toLocalInput(nextHour(new Date())));
+    const [bookings, setBookings] = useState([]);
+    const [selection, setSelection] = useState(null);
+    const [now] = useState(() => new Date());
+
+    const loadBookings = useCallback(() => {
+        if (!ebikeId) {
+            return;
+        }
+        api.get(`/ebikes/${ebikeId}/booked`)
+            .then((response) => setBookings(response.data.map((b) => ({ start: new Date(b.start), end: new Date(b.end) }))))
+            .catch(() => {});
+    }, [ebikeId]);
+
+    useEffect(loadBookings, [loadBookings]);
 
     // Pre-fill from the profile; the field stays editable for this one reservation.
     useEffect(() => {
@@ -33,19 +46,20 @@ const ReservationForm = () => {
         return <Navigate to="/" replace />;
     }
 
-    const timesInOrder = new Date(endTime) > new Date(startTime);
     const image = getImage(ebikeId);
+    const hours = selection ? (selection.end - selection.start) / 3600000 : 0;
+    const timeFormat = { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!timesInOrder) {
+        if (!selection) {
             return;
         }
         try {
             await api.post('/rentals/pending', {
                 ebike: { id: ebikeId },
-                rentalStartTime: startTime,
-                rentalEndTime: endTime,
+                rentalStartTime: toLocalInput(selection.start),
+                rentalEndTime: toLocalInput(selection.end),
                 passportNumber: passportNumber,
             });
             Swal.fire({
@@ -58,6 +72,10 @@ const ReservationForm = () => {
             }).then(() => navigate('/'));
         } catch (error) {
             console.error('Error creating reservation:', error);
+            if (error.response?.status === 409) {
+                setSelection(null);
+                loadBookings();
+            }
             Swal.fire({
                 title: 'Reservation not sent',
                 text: errorMessage(error, 'The server could not be reached. Try again in a moment.'),
@@ -73,9 +91,9 @@ const ReservationForm = () => {
                 {image && <img src={image} alt={ebikeName} />}
                 <p className="reserve-total">
                     <span>Total</span>
-                    <strong aria-live="polite">${rentalPrice(startTime, endTime, pricePerDay).toFixed(2)}</strong>
+                    <strong aria-live="polite">${selection ? rentalPrice(selection.start, selection.end, pricePerDay).toFixed(2) : '0.00'}</strong>
                 </p>
-                <p className="reserve-rate">${pricePerDay} per day, charged for each hour you start.</p>
+                <p className="reserve-rate">${pricePerDay} per day, charged per hour.</p>
             </aside>
 
             <div className="reserve-form">
@@ -92,31 +110,28 @@ const ReservationForm = () => {
                         />
                     </label>
 
-                    <div className="form-row">
-                        <label className="form-group">
-                            <span>Start</span>
-                            <input
-                                type="datetime-local"
-                                value={startTime}
-                                onChange={(e) => setStartTime(e.target.value)}
-                                required
-                            />
-                        </label>
+                    <fieldset className="form-group calendar-fieldset">
+                        <legend><span>When</span></legend>
+                        <p className="reserve-as">Click every hour you want, or a first and a last hour to fill in the ones between.</p>
+                        <HourCalendar
+                            bookings={bookings}
+                            selection={selection}
+                            now={now}
+                            onPick={(slot) => setSelection(pickHour(selection, slot, bookings))} />
+                    </fieldset>
 
-                        <label className="form-group">
-                            <span>End</span>
-                            <input
-                                type="datetime-local"
-                                value={endTime}
-                                onChange={(e) => setEndTime(e.target.value)}
-                                required
-                            />
-                        </label>
+                    <div className="calendar-selection">
+                        <p aria-live="polite">
+                            {selection
+                                ? `${selection.start.toLocaleString(undefined, timeFormat)} – ${selection.end.toLocaleString(undefined, timeFormat)} (${hours} ${hours === 1 ? 'hour' : 'hours'})`
+                                : 'No time picked yet'}
+                        </p>
+                        {selection && (
+                            <button type="button" className="calendar-clear" onClick={() => setSelection(null)}>Clear</button>
+                        )}
                     </div>
 
-                    {!timesInOrder && <p className="form-error" role="alert">The end time must be after the start time.</p>}
-
-                    <button className="auth-button" type="submit">
+                    <button className="auth-button" type="submit" disabled={!selection}>
                         Send reservation
                     </button>
                 </form>

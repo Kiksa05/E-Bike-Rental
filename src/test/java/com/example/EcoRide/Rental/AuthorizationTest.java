@@ -57,7 +57,7 @@ class AuthorizationTest {
 
     private static final String RESERVATION = """
             {"customer":{"id":1},"ebike":{"id":3},"passportNumber":"X1",
-             "rentalStartTime":"2026-12-01T10:00","rentalEndTime":"2026-12-01T12:00"}""";
+             "rentalStartTime":"2099-12-01T10:00","rentalEndTime":"2099-12-01T12:00"}""";
 
     @Autowired
     private MockMvc mvc;
@@ -225,7 +225,7 @@ class AuthorizationTest {
     void reservationUsesTheCustomerFromTheToken() throws Exception {
         Customer tokenOwner = new Customer(2, "U", "u@demo.local", "1", 0, "hash", "user");
         when(customerDao.findById(2)).thenReturn(Optional.of(tokenOwner));
-        when(ebikeDao.findById(3)).thenReturn(Optional.of(new Ebike()));
+        when(ebikeDao.findByIdForUpdate(3)).thenReturn(Optional.of(new Ebike()));
 
         // The body names customer 1, but the token belongs to customer 2.
         mvc.perform(as(json(post("/rentals/pending"), RESERVATION), token("2", "user"))).andExpect(status().isCreated());
@@ -239,7 +239,7 @@ class AuthorizationTest {
     void reservationMustEndAfterItStarts() throws Exception {
         String backwards = """
                 {"ebike":{"id":3},"passportNumber":"X1",
-                 "rentalStartTime":"2026-12-01T12:00","rentalEndTime":"2026-12-01T10:00"}""";
+                 "rentalStartTime":"2099-12-01T12:00","rentalEndTime":"2099-12-01T10:00"}""";
 
         mvc.perform(as(json(post("/rentals/pending"), backwards), token("2", "user"))).andExpect(status().isBadRequest());
 
