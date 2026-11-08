@@ -191,8 +191,7 @@ class ProfileManagementTest {
         assertTrue(user.isDisabled());
         verify(customerDao, never()).delete(any());
         verify(rentalDao).deleteAll(List.of(pending, upcoming));
-        assertEquals("Available", upcoming.getEbike().getStatus());
-        assertEquals("Not Available", finished.getEbike().getStatus());
+        verify(ebikeDao, never()).save(any());
     }
 
     @Test
@@ -223,7 +222,7 @@ class ProfileManagementTest {
 
     private Rental rental(int id, String status, LocalDateTime end) {
         Ebike ebike = new Ebike();
-        ebike.setStatus("Approved".equals(status) ? "Not Available" : "Available");
+        ebike.setStatus("Available");
         Rental rental = new Rental();
         rental.setId(id);
         rental.setEbike(ebike);

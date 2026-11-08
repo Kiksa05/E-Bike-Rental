@@ -9,6 +9,7 @@ import Navbar from './components/Navbar';
 import AdminDashboard from './components/AdminDashboard';
 import ProfileForm from './components/ProfileForm';
 import UserManagement from './components/UserManagement';
+import ReservationHistory from './components/ReservationHistory';
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
             <Route path="/admin/users" element={<UserManagement />} />
             <Route path="/admin/users/:id" element={<ProfileForm />} />
             <Route path="/profile" element={<ProfileForm />} />
+            <Route path="/reservations" element={<ReservationHistory />} />
           </Routes>
         </main>
       </Router>

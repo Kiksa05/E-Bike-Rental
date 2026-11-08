@@ -2,7 +2,6 @@ package com.example.EcoRide.Rental.controllers;
 
 import com.example.EcoRide.Rental.models.Customer;
 import com.example.EcoRide.Rental.dao.CustomerDao;
-import com.example.EcoRide.Rental.dao.EbikeDao;
 import com.example.EcoRide.Rental.dao.RentalDao;
 import com.example.EcoRide.Rental.models.Rental;
 import com.example.EcoRide.Rental.service.Email;
@@ -44,17 +43,14 @@ public class CustomerController {
 
     private final RentalDao rentalDao;
 
-    private final EbikeDao ebikeDao;
-
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public CustomerController(CustomerDao customerDao, Email emailService, JwtEncoder jwtEncoder,
-                              RentalDao rentalDao, EbikeDao ebikeDao) {
+                              RentalDao rentalDao) {
         this.customerDao = customerDao;
         this.emailService = emailService;
         this.jwtEncoder = jwtEncoder;
         this.rentalDao = rentalDao;
-        this.ebikeDao = ebikeDao;
     }
 
     @GetMapping("/{id}")
@@ -156,12 +152,6 @@ public class CustomerController {
                         || ("Approved".equals(rental.getRentalStatus())
                             && rental.getRentalEndTime() != null && rental.getRentalEndTime().isAfter(now)))
                 .toList();
-        for (Rental rental : open) {
-            if ("Approved".equals(rental.getRentalStatus()) && rental.getEbike() != null) {
-                rental.getEbike().setStatus("Available");
-                ebikeDao.save(rental.getEbike());
-            }
-        }
         rentalDao.deleteAll(open);
 
         customer.setDisabled(true);

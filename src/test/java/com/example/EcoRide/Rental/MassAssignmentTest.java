@@ -88,7 +88,7 @@ class MassAssignmentTest {
     @Test
     void reservationIgnoresIdAndAlwaysStartsPending() throws Exception {
         when(customerDao.findById(2)).thenReturn(Optional.of(new Customer()));
-        when(ebikeDao.findById(3)).thenReturn(Optional.of(new Ebike()));
+        when(ebikeDao.findByIdForUpdate(3)).thenReturn(Optional.of(new Ebike()));
 
         send(post("/rentals/pending").with(jwt().jwt(token -> token.subject("2"))), """
                 {"id":1,"customer":{"id":2},"ebike":{"id":3},"passportNumber":"X1",

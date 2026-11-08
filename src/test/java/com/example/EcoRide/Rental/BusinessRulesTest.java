@@ -76,16 +76,16 @@ class BusinessRulesTest {
     // Rentals
 
     @Test
-    void approvingMakesTheBikeUnavailable() throws Exception {
+    void approvingBlocksOnlyTheBookedTimeNotTheWholeBike() throws Exception {
         Rental rental = pendingRental();
         when(rentalDao.findById(1)).thenReturn(Optional.of(rental));
 
         mvc.perform(put("/rentals/approve/1").with(ADMIN)).andExpect(status().isOk());
 
         assertEquals("Approved", rental.getRentalStatus());
-        assertEquals("Not Available", rental.getEbike().getStatus());
+        assertEquals("Available", rental.getEbike().getStatus());
         verify(rentalDao).save(rental);
-        verify(ebikeDao).save(rental.getEbike());
+        verify(ebikeDao, never()).save(any());
     }
 
     @Test
@@ -102,14 +102,14 @@ class BusinessRulesTest {
     }
 
     @Test
-    void deletingARentalFreesTheBike() throws Exception {
+    void deletingARentalKeepsTheAdminsBikeStatus() throws Exception {
         Rental rental = pendingRental();
-        rental.getEbike().setStatus("Not Available");
+        rental.getEbike().setStatus("Not Available"); // e.g. an admin took it out for repairs
         when(rentalDao.findById(1)).thenReturn(Optional.of(rental));
 
         mvc.perform(delete("/rentals/1").with(ADMIN)).andExpect(status().isOk());
 
-        assertEquals("Available", rental.getEbike().getStatus());
+        assertEquals("Not Available", rental.getEbike().getStatus());
         verify(rentalDao).delete(rental);
     }
 

@@ -56,6 +56,51 @@
     background: var(--line);
 }
 
+.history-filter {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+.history-filter select {
+    padding: 8px 10px;
+    background: #fff;
+    border: 1px solid var(--muted);
+    border-radius: 8px;
+    color: var(--ink);
+    font: inherit;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 3px 12px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 600;
+    background: var(--line);
+    color: var(--ink);
+}
+
+.status-badge.approved {
+    background: var(--mint);
+    color: var(--forest);
+}
+
+/* Darker than --amber: small text on white needs 4.5:1 contrast, and --amber only reaches about 4:1. */
+.status-badge.pending {
+    background: #fff;
+    color: #8a5200;
+    box-shadow: inset 0 0 0 1.5px #8a5200;
+}
+
+.status-badge.rejected {
+    background: #fff;
+    color: var(--error);
+    box-shadow: inset 0 0 0 1.5px var(--error);
+}
+
 .auth-button.secondary {
     background: transparent;
     color: var(--forest);

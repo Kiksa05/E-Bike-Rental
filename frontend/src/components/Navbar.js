@@ -53,7 +53,7 @@ const Navbar = () => {
                         </li>
                         {isAdmin && (
                             <li>
-                                <Link to="/admin" onClick={closeMenu}>Reservations</Link>
+                                <Link to="/admin" onClick={closeMenu}>To review</Link>
                             </li>
                         )}
                         {isAdmin && (
@@ -61,6 +61,9 @@ const Navbar = () => {
                                 <Link to="/admin/users" onClick={closeMenu}>Users</Link>
                             </li>
                         )}
+                        <li>
+                            <Link to="/reservations" onClick={closeMenu}>{isAdmin ? 'All reservations' : 'My reservations'}</Link>
+                        </li>
                         <li>
                             <Link to="/profile" onClick={closeMenu}>Profile</Link>
                         </li>

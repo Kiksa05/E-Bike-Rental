@@ -225,7 +225,7 @@ class AuthorizationTest {
     void reservationUsesTheCustomerFromTheToken() throws Exception {
         Customer tokenOwner = new Customer(2, "U", "u@demo.local", "1", 0, "hash", "user");
         when(customerDao.findById(2)).thenReturn(Optional.of(tokenOwner));
-        when(ebikeDao.findById(3)).thenReturn(Optional.of(new Ebike()));
+        when(ebikeDao.findByIdForUpdate(3)).thenReturn(Optional.of(new Ebike()));
 
         // The body names customer 1, but the token belongs to customer 2.
         mvc.perform(as(json(post("/rentals/pending"), RESERVATION), token("2", "user"))).andExpect(status().isCreated());

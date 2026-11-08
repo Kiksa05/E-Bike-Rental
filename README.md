@@ -6,15 +6,32 @@ EcoRide Rental System is a full-stack web application that allows customers to b
 
 ### Customer
 - Register a new account (passwords hashed with BCrypt, unique email enforced)
-- Log in securely
+- Log in securely (JWT tokens, valid for 2 hours)
 - Browse available e-bikes
-- Reserve an e-bike
-- View reservation status
+- Reserve an e-bike; the passport number is pre-filled from your profile
+- **My reservations:** see all your reservations with their price and status (Pending, Approved, Rejected)
+- **Profile:** edit your name, email, phone and passport number
+- Change your password (requires the current password, at least 8 characters)
 
 ### Administrator
-- View all reservation requests
-- Approve or reject reservations
+- Approve or reject reservation requests
+- **All reservations:** see every customer's reservations, newest first, filtered by status
+- **Users:** edit any profile, set a new password, and switch users between the user and admin roles
+- Disable or re-enable accounts
 - Manage available e-bikes
+
+### Booking rules
+- A bike cannot be booked twice for overlapping times. A new reservation is refused if it overlaps a pending or approved reservation for that bike, while back-to-back bookings (10:00-12:00, then 12:00-14:00) are fine.
+- Two bookings sent at the same moment are handled safely: the bike is locked while a reservation is checked and saved, so only one of them succeeds.
+- A rejected reservation frees its time slot again.
+- Booking a bike blocks only the hours it is booked for. The same bike can be reserved for tomorrow or any other free time.
+- A bike's Available / Not Available status is set by admins only, for example while it is being repaired. Reservations never change it.
+
+### Accounts and data retention
+- Accounts are **disabled, never deleted**, because customer data must be kept for at least two years.
+- Disabling an account logs the user out on their next request and blocks new logins. Reservations that have not finished yet are removed, which frees those time slots, while past rentals stay as history.
+- Every request checks the account behind the token, so disabling a user or changing a role takes effect immediately rather than when the token expires.
+- Admins cannot change their own role or disable their own account, so the last admin cannot lock themselves out.
 
 ---
 
@@ -29,6 +46,7 @@ EcoRide Rental System is a full-stack web application that allows customers to b
 
 ### Backend
 - Spring Boot
+- Spring Security (OAuth2 resource server with JWT)
 - Spring Data JPA
 - RESTful API
 - Maven
@@ -109,7 +127,7 @@ Import `database/demo.sql` into it to get the demo accounts, bikes and stations.
 
 Copy `.env.example` to `.env` in the project root and set `JWT_SECRET`. The backend will not start without it.
 
-New accounts are always normal users. To make someone an admin, set it in the database:
+New accounts are always normal users. After that, admins change roles on the **Users** page. Only the very first admin of a fresh database has to be set directly:
 
 ```sql
 UPDATE customer SET role = 'admin' WHERE email = 'someone@example.com';
@@ -185,23 +203,21 @@ http://localhost:3000
 
 ## Application Workflow
 
-1. Register a customer account.
-2. Log in.
-3. Browse available e-bikes.
-4. Select an e-bike and create a reservation.
-5. The reservation is submitted with a **Pending** status.
-6. An administrator approves or rejects the reservation.
-7. Once approved, the reservation becomes active.
+1. Register a customer account and log in.
+2. Optionally add your passport number on the **Profile** page.
+3. Browse available e-bikes, pick one and choose a start and end time.
+4. The reservation is submitted with a **Pending** status. If the bike is already booked for that time, you are asked to pick another time or bike.
+5. An administrator approves or rejects it on the **To review** page.
+6. Follow the status on **My reservations**. Once approved, the bike is yours for that time, and others can still book it for other times.
 
 ---
 
 ## Future Improvements
 
 - Email notifications
-- User profile management
+- Customers cancelling their own pending reservations
 - Interactive station map
 - Online payment integration
-- Reservation history
 
 ---
 
