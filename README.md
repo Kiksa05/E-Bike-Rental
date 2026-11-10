@@ -9,13 +9,14 @@ EcoRide Rental System is a full-stack web application that allows customers to b
 - Log in securely (JWT tokens, valid for 2 hours)
 - Browse available e-bikes
 - Reserve an e-bike on an hourly calendar: pick a day in the next two weeks and see which hours are free, taken or past, then click the hours you want (or a first and a last hour to fill in the ones between). The passport number is pre-filled from your profile
-- **My reservations:** see all your reservations with their price and status (Pending, Approved, Rejected)
+- **My reservations:** see all your reservations with their price and status (Pending, Approved, Rejected, Cancelled)
+- Cancel your own reservation while it is pending, or approved but not started yet
 - **Profile:** edit your name, email, phone and passport number
 - Change your password (requires the current password, at least 8 characters)
 
 ### Administrator
 - Approve or reject reservation requests
-- **All reservations:** see every customer's reservations, newest first, filtered by status
+- **All reservations:** see every customer's reservations, newest first, filtered by status, and cancel any that have not started
 - **Users:** edit any profile, set a new password, and switch users between the user and admin roles
 - Disable or re-enable accounts
 - Manage available e-bikes
@@ -24,7 +25,7 @@ EcoRide Rental System is a full-stack web application that allows customers to b
 - Reservations start and end on the hour (13:00, 14:00, ...). The current hour can still be booked, but earlier ones cannot.
 - A bike cannot be booked twice for overlapping times. A new reservation is refused if it overlaps a pending or approved reservation for that bike, while back-to-back bookings (10:00-12:00, then 12:00-14:00) are fine.
 - Two bookings sent at the same moment are handled safely: the bike is locked while a reservation is checked and saved, so only one of them succeeds.
-- A rejected reservation frees its time slot again.
+- A rejected or cancelled reservation frees its time slot again. Cancelled reservations stay in the history.
 - Booking a bike blocks only the hours it is booked for. The same bike can be reserved for tomorrow or any other free time.
 - A bike's Available / Not Available status is set by admins only, for example while it is being repaired. Reservations never change it.
 
@@ -216,7 +217,6 @@ http://localhost:3000
 ## Future Improvements
 
 - Email notifications
-- Customers cancelling their own pending reservations
 - Interactive station map
 - Online payment integration
 

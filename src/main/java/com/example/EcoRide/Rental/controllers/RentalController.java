@@ -161,6 +161,32 @@ public class RentalController {
     }
 
 
+    // Kept as "Cancelled" rather than deleted, for the history. Overlap checks ignore it, so the hours free up at once.
+    @PutMapping("/{id}/cancel")
+    public ResponseEntity<String> cancelRental(@PathVariable int id, Authentication authentication) {
+        Rental rental = rentalDao.findById(id).orElse(null);
+        if (rental == null) {
+            return new ResponseEntity<>("Rental not found", HttpStatus.NOT_FOUND);
+        }
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(authority -> "ROLE_admin".equals(authority.getAuthority()));
+        boolean isOwner = rental.getCustomer() != null
+                && authentication.getName().equals(String.valueOf(rental.getCustomer().getId()));
+        if (!isAdmin && !isOwner) {
+            return new ResponseEntity<>("You can only cancel your own reservations", HttpStatus.FORBIDDEN);
+        }
+        if (!"Pending".equals(rental.getRentalStatus()) && !"Approved".equals(rental.getRentalStatus())) {
+            return new ResponseEntity<>("Only pending or approved reservations can be cancelled", HttpStatus.BAD_REQUEST);
+        }
+        if (rental.getRentalStartTime() != null && !rental.getRentalStartTime().isAfter(LocalDateTime.now())) {
+            return new ResponseEntity<>("This rental has already started", HttpStatus.BAD_REQUEST);
+        }
+
+        rental.setRentalStatus("Cancelled");
+        rentalDao.save(rental);
+        return ResponseEntity.ok("Reservation cancelled");
+    }
+
     @DeleteMapping("/{id}")
     @Transactional
     public ResponseEntity<String> deleteRental(@PathVariable int id) {

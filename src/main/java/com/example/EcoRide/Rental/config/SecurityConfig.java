@@ -65,6 +65,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/ebikes", "/ebikes/**", "/stations", "/stations/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/rentals/pending").authenticated()
                         .requestMatchers(HttpMethod.GET, "/rentals/mine").authenticated()
+                        // Owner-or-admin is checked in the controller, since the owner is stored on the rental.
+                        .requestMatchers(HttpMethod.PUT, "/rentals/{id}/cancel").authenticated()
                         .requestMatchers(HttpMethod.GET, "/customers/{id}").access(ownerOrAdmin)
                         .requestMatchers(HttpMethod.PUT, "/customers/{id}", "/customers/{id}/password").access(ownerOrAdmin)
                         .anyRequest().hasRole(ADMIN))
