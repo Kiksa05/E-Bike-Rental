@@ -157,6 +157,33 @@ class ReservationRulesTest {
         verify(rentalDao, never()).save(any());
     }
 
+    @Test
+    void theCurrentHourCanNoLongerBeBooked() throws Exception {
+        // A pending request for an hour that has started would be cancelled by the expiry job straight away.
+        String thisHour = LocalDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.HOURS).toString();
+        String nextHour = LocalDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.HOURS).plusHours(1).toString();
+        mvc.perform(post("/rentals/pending").with(USER_2).contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"ebike\":{\"id\":3},\"passportNumber\":\"X1\",\"rentalStartTime\":\"" + thisHour
+                                + "\",\"rentalEndTime\":\"" + nextHour + "\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("The start time is in the past"));
+
+        verify(rentalDao, never()).save(any());
+    }
+
+    @Test
+    void aRequestWhoseStartHasPassedCannotBeApprovedOrRejected() throws Exception {
+        Rental stale = ownedBy(2, "Pending", LocalDateTime.now().minusMinutes(5));
+
+        mvc.perform(put("/rentals/approve/7").with(ADMIN))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("This reservation's start time has passed, so it was cancelled"));
+        mvc.perform(put("/rentals/reject/7").with(ADMIN)).andExpect(status().isBadRequest());
+
+        assertEquals("Pending", stale.getRentalStatus());
+        verify(rentalDao, never()).save(any());
+    }
+
     // Calendar
 
     @Test
@@ -176,6 +203,90 @@ class ReservationRulesTest {
                 .andReturn().getResponse().getContentAsString();
 
         assertFalse(body.toLowerCase().contains("secret"), body);
+    }
+
+    // Cancelling
+
+    @Test
+    void ownerCancelsAPendingReservation() throws Exception {
+        Rental rental = ownedBy(2, "Pending", LocalDateTime.now().plusDays(1));
+
+        mvc.perform(put("/rentals/7/cancel").with(USER_2)).andExpect(status().isOk());
+
+        assertEquals("Cancelled", rental.getRentalStatus());
+        verify(rentalDao).save(rental);
+        verify(rentalDao, never()).delete(any());
+    }
+
+    @Test
+    void ownerCancelsAnApprovedReservationBeforeItStarts() throws Exception {
+        Rental rental = ownedBy(2, "Approved", LocalDateTime.now().plusHours(2));
+
+        mvc.perform(put("/rentals/7/cancel").with(USER_2)).andExpect(status().isOk());
+
+        assertEquals("Cancelled", rental.getRentalStatus());
+    }
+
+    @Test
+    void adminCancelsSomeoneElsesReservation() throws Exception {
+        Rental rental = ownedBy(2, "Approved", LocalDateTime.now().plusDays(1));
+
+        mvc.perform(put("/rentals/7/cancel").with(ADMIN)).andExpect(status().isOk());
+
+        assertEquals("Cancelled", rental.getRentalStatus());
+    }
+
+    @Test
+    void otherUsersCannotCancelYourReservation() throws Exception {
+        Rental rental = ownedBy(5, "Pending", LocalDateTime.now().plusDays(1));
+
+        mvc.perform(put("/rentals/7/cancel").with(USER_2)).andExpect(status().isForbidden());
+
+        assertEquals("Pending", rental.getRentalStatus());
+        verify(rentalDao, never()).save(any());
+    }
+
+    @Test
+    void startedRentalsCannotBeCancelled() throws Exception {
+        Rental rental = ownedBy(2, "Approved", LocalDateTime.now().minusMinutes(5));
+
+        mvc.perform(put("/rentals/7/cancel").with(USER_2))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("This rental has already started"));
+
+        assertEquals("Approved", rental.getRentalStatus());
+    }
+
+    @Test
+    void onlyPendingOrApprovedReservationsCanBeCancelled() throws Exception {
+        for (String finished : List.of("Cancelled", "Rejected")) {
+            Rental rental = ownedBy(2, finished, LocalDateTime.now().plusDays(1));
+
+            mvc.perform(put("/rentals/7/cancel").with(USER_2))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(content().string("Only pending or approved reservations can be cancelled"));
+
+            assertEquals(finished, rental.getRentalStatus());
+        }
+        verify(rentalDao, never()).save(any());
+    }
+
+    @Test
+    void cancellingNeedsALoginAndAnExistingRental() throws Exception {
+        mvc.perform(put("/rentals/7/cancel")).andExpect(status().isUnauthorized());
+        mvc.perform(put("/rentals/99/cancel").with(USER_2)).andExpect(status().isNotFound());
+    }
+
+    private Rental ownedBy(int customerId, String status, LocalDateTime start) {
+        Rental rental = new Rental();
+        rental.setId(7);
+        rental.setCustomer(new Customer(customerId, "C", "c@demo.local", "1", 0, "hash", "user"));
+        rental.setEbike(bike);
+        rental.setRentalStatus(status);
+        rental.setRentalStartTime(start);
+        rental.setRentalEndTime(start.plusHours(2));
+        when(rentalDao.findById(7)).thenReturn(Optional.of(rental));
+        return rental;
     }
 
     // History

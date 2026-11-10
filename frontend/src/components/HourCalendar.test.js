@@ -34,6 +34,7 @@ test('taken and past hours cannot be clicked', () => {
     expect(hour('18:00')).toBeDisabled();
     expect(hour('19:00')).toBeDisabled();
     expect(hour('07:00')).toBeDisabled();
-    expect(hour('08:00')).toBeEnabled(); // the current hour is still bookable
+    expect(hour('08:00')).toBeDisabled(); // has already started, so it cannot be booked
+    expect(hour('09:00')).toBeEnabled();
     expect(hour('20:00')).toBeEnabled();
 });

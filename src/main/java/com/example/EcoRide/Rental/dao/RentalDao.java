@@ -1,5 +1,8 @@
 package com.example.EcoRide.Rental.dao;
 
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.example.EcoRide.Rental.models.Rental;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -20,6 +23,11 @@ public interface RentalDao extends JpaRepository<Rental, Integer> {
     List<Rental> findByCustomerId(int customerId);
 
     List<Rental> findByCustomerIdOrderByRentalStartTimeDesc(int customerId);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE Rental r SET r.rentalStatus = 'Cancelled' WHERE r.rentalStatus = 'Pending' AND r.rentalStartTime <= :now")
+    int cancelPendingStartedBefore(@Param("now") LocalDateTime now);
 
     @Query("SELECT r FROM Rental r WHERE r.ebike.id = :ebikeId AND r.rentalStatus IN ('Pending', 'Approved')"
             + " AND r.rentalEndTime > :now ORDER BY r.rentalStartTime")

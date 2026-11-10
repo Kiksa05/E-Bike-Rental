@@ -35,7 +35,7 @@ const HourCalendar = ({ bookings, selection, onPick, now }) => {
             <div className="calendar-hours" role="group" aria-label="Hours">
                 {hourSlots(day).map((slot) => {
                     const end = nextHour(slot);
-                    const past = end <= now;
+                    const past = slot <= now; // an hour that has begun can no longer be booked
                     const taken = !isFree(slot, end, bookings);
                     const chosen = selection && slot >= selection.start && slot < selection.end;
                     const state = past ? 'past' : taken ? 'taken' : chosen ? 'chosen' : 'free';
