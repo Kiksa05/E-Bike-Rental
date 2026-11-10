@@ -22,7 +22,8 @@ EcoRide Rental System is a full-stack web application that allows customers to b
 - Manage available e-bikes
 
 ### Booking rules
-- Reservations start and end on the hour (13:00, 14:00, ...). The current hour can still be booked, but earlier ones cannot.
+- Reservations start and end on the hour (13:00, 14:00, ...). The earliest start is the next full hour.
+- A pending request that no admin approved or rejected before its start time is cancelled automatically (a background job checks every minute), which frees its hours.
 - A bike cannot be booked twice for overlapping times. A new reservation is refused if it overlaps a pending or approved reservation for that bike, while back-to-back bookings (10:00-12:00, then 12:00-14:00) are fine.
 - Two bookings sent at the same moment are handled safely: the bike is locked while a reservation is checked and saved, so only one of them succeeds.
 - A rejected or cancelled reservation frees its time slot again. Cancelled reservations stay in the history.
@@ -97,6 +98,8 @@ docker compose up -d --build
 | Frontend | http://localhost:3000 |
 | Backend | http://localhost:8081 |
 | MySQL | `127.0.0.1:3307` (user `root`, password `root`) |
+
+Booking times are in local time. The backend container uses `Europe/Skopje` by default; set `APP_TIMEZONE` in `.env` if you are in a different zone.
 
 Demo logins, both with the password `demo1234`: `kiksa@admin.com` (admin) and `user@demo.local` (user).
 

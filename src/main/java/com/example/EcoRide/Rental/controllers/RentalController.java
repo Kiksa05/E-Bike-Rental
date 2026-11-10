@@ -82,8 +82,8 @@ public class RentalController {
         if (!onTheHour(request.rentalStartTime()) || !onTheHour(request.rentalEndTime())) {
             return new ResponseEntity<>("Reservations start and end on the hour, like 13:00", HttpStatus.BAD_REQUEST);
         }
-        // The current hour is still bookable, so you can pick a bike up right away.
-        if (request.rentalStartTime().isBefore(LocalDateTime.now().truncatedTo(ChronoUnit.HOURS))) {
+        // The earliest start is the next full hour: an hour that has begun would be expired before anyone approved it.
+        if (!request.rentalStartTime().isAfter(LocalDateTime.now())) {
             return new ResponseEntity<>("The start time is in the past", HttpStatus.BAD_REQUEST);
         }
 
@@ -117,6 +117,12 @@ public class RentalController {
         return new ResponseEntity<>("Reservation created successfully and is pending approval.", HttpStatus.CREATED);
     }
 
+    // The expiry job cancels these within a minute; this closes the gap until it runs.
+    private static boolean startHasPassed(Rental rental) {
+        return "Pending".equals(rental.getRentalStatus()) && rental.getRentalStartTime() != null
+                && !rental.getRentalStartTime().isAfter(LocalDateTime.now());
+    }
+
     private static boolean onTheHour(LocalDateTime time) {
         return time.equals(time.truncatedTo(ChronoUnit.HOURS));
     }
@@ -131,6 +137,9 @@ public class RentalController {
         Rental rental = rentalDao.findById(id).orElse(null);
         if (rental == null) {
             return new ResponseEntity<>("Rental not found", HttpStatus.NOT_FOUND);
+        }
+        if (startHasPassed(rental)) {
+            return new ResponseEntity<>("This reservation's start time has passed, so it was cancelled", HttpStatus.BAD_REQUEST);
         }
 
         Ebike ebike = rental.getEbike();
@@ -153,6 +162,9 @@ public class RentalController {
         Rental rental = rentalDao.findById(id).orElse(null);
         if (rental == null) {
             return new ResponseEntity<>("Rental not found", HttpStatus.NOT_FOUND);
+        }
+        if (startHasPassed(rental)) {
+            return new ResponseEntity<>("This reservation's start time has passed, so it was cancelled", HttpStatus.BAD_REQUEST);
         }
 
         rental.setRentalStatus("Rejected");

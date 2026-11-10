@@ -157,6 +157,33 @@ class ReservationRulesTest {
         verify(rentalDao, never()).save(any());
     }
 
+    @Test
+    void theCurrentHourCanNoLongerBeBooked() throws Exception {
+        // A pending request for an hour that has started would be cancelled by the expiry job straight away.
+        String thisHour = LocalDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.HOURS).toString();
+        String nextHour = LocalDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.HOURS).plusHours(1).toString();
+        mvc.perform(post("/rentals/pending").with(USER_2).contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"ebike\":{\"id\":3},\"passportNumber\":\"X1\",\"rentalStartTime\":\"" + thisHour
+                                + "\",\"rentalEndTime\":\"" + nextHour + "\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("The start time is in the past"));
+
+        verify(rentalDao, never()).save(any());
+    }
+
+    @Test
+    void aRequestWhoseStartHasPassedCannotBeApprovedOrRejected() throws Exception {
+        Rental stale = ownedBy(2, "Pending", LocalDateTime.now().minusMinutes(5));
+
+        mvc.perform(put("/rentals/approve/7").with(ADMIN))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("This reservation's start time has passed, so it was cancelled"));
+        mvc.perform(put("/rentals/reject/7").with(ADMIN)).andExpect(status().isBadRequest());
+
+        assertEquals("Pending", stale.getRentalStatus());
+        verify(rentalDao, never()).save(any());
+    }
+
     // Calendar
 
     @Test
